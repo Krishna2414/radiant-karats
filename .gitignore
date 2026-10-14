@@ -1,0 +1,21 @@
+# Secrets: never commit these
+env.py
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Local databases
+*.sqlite3
+
+# Collected static files (Heroku runs collectstatic itself)
+staticfiles/
+
+# Editors and operating systems
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
