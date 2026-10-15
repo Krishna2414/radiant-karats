@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class DesignsConfig(AppConfig):
+class RingsConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'designs'
+    name = 'rings'

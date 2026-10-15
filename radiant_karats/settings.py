@@ -8,9 +8,8 @@ import os
 import sys
 from pathlib import Path
 
-import cloudinary
 import dj_database_url
-from django.contrib.messages import constants as message_constants
+from django.contrib.messages import constants as messages
 
 if os.path.isfile("env.py"):
     import env  # noqa: F401  Sets the local environment variables.
@@ -47,9 +46,7 @@ INSTALLED_APPS = [
     "allauth.account",
     "crispy_forms",
     "crispy_bootstrap5",
-    "cloudinary",
-    "designs",
-    "ring_requests",
+    "rings",
 ]
 
 SITE_ID = 1
@@ -120,16 +117,14 @@ AUTHENTICATION_BACKENDS = [
     "allauth.account.auth_backends.AuthenticationBackend",
 ]
 
-# Accounts (django-allauth): sign up with a username and email address,
-# log in with the username. There's no email confirmation step, so
-# anyone can register and use the site straight away.
-ACCOUNT_LOGIN_METHODS = {"username"}
-ACCOUNT_SIGNUP_FIELDS = ["username*", "email*", "password1*", "password2*"]
+# Accounts with allauth. There's no email confirmation, so anyone can
+# register and use the site straight away.
 ACCOUNT_EMAIL_VERIFICATION = "none"
-LOGIN_URL = "account_login"
 LOGIN_REDIRECT_URL = "/"
-ACCOUNT_LOGOUT_REDIRECT_URL = "/"
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+LOGOUT_REDIRECT_URL = "/"
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 LANGUAGE_CODE = "en-gb"
 TIME_ZONE = "Europe/London"
@@ -149,14 +144,10 @@ STORAGES = {
     },
 }
 
-# Cloudinary reads CLOUDINARY_URL from the environment. Serving images
-# over https stops browsers blocking them on the deployed site.
-cloudinary.config(secure=True)
-
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 # Bootstrap calls its red alert "danger"; Django calls it "error".
-MESSAGE_TAGS = {message_constants.ERROR: "danger"}
+MESSAGE_TAGS = {messages.ERROR: "danger"}
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
