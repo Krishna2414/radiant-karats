@@ -322,6 +322,7 @@ button:focus-visible,
     padding: 1.25rem;
 }
 
+.ring-info h2,
 .ring-info h3 {
     margin-bottom: 0.25rem;
     font-family: var(--rk-serif);
@@ -454,4 +455,24 @@ button:focus-visible,
 
 .site-footer a:hover {
     color: #fff;
+}
+
+/* ---------- Page links (Previous and Next) ---------- */
+.pagination {
+    --bs-pagination-color: var(--rk-ink);
+    --bs-pagination-border-color: var(--rk-line);
+    --bs-pagination-hover-color: var(--rk-ink);
+    --bs-pagination-hover-bg: var(--rk-champagne);
+    --bs-pagination-hover-border-color: var(--rk-line);
+    --bs-pagination-focus-color: var(--rk-ink);
+    --bs-pagination-focus-bg: var(--rk-champagne);
+    --bs-pagination-focus-box-shadow: none;
+    --bs-pagination-active-bg: var(--rk-ink);
+    --bs-pagination-active-border-color: var(--rk-ink);
+}
+
+/* The same keyboard outline as the rest of the site. */
+.page-link:focus-visible {
+    outline: 3px solid var(--rk-ink);
+    outline-offset: 2px;
 }

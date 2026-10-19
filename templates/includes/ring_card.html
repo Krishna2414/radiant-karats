@@ -1,0 +1,17 @@
+{% load static %}
+<article class="ring-card">
+    <div class="ring-image-wrap">
+        {% if ring.photo_url %}
+        <img class="ring-image" src="{{ ring.photo_url }}" alt="{{ ring.alt_text }}" loading="lazy">
+        {% else %}
+        <img class="ring-image" src="{% static ring.placeholder_image %}" alt="{{ ring.get_style_display }} ring drawing" loading="lazy">
+        {% endif %}
+    </div>
+    <div class="ring-info">
+        <div>
+            <{{ heading|default:"h2" }}>{{ ring.name }}</{{ heading|default:"h2" }}>
+            <p>{{ ring.get_style_display }} · {{ ring.get_metal_display }}</p>
+        </div>
+        <span class="ring-price">£{{ ring.price|floatformat:"-2g" }}</span>
+    </div>
+</article>

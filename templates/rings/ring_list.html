@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}All rings{% endblock %}
+
+{% block content %}
+<section class="collection-section">
+    <div class="container">
+        <div class="section-heading">
+            <div>
+                <p class="eyebrow">The collection</p>
+                <h1>All rings</h1>
+            </div>
+            <p class="section-intro">Every ring in the collection, added by our community.</p>
+        </div>
+
+        {% if rings %}
+        <div class="row g-4">
+            {% for ring in rings %}
+            <div class="col-md-6 col-lg-4">
+                {% include "includes/ring_card.html" %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <p class="mb-0">No rings yet. When people add rings, you'll see them here.</p>
+        </div>
+        {% endif %}
+
+        {% if is_paginated %}
+        <nav class="mt-5" aria-label="Ring pages">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+                {% endif %}
+                <li class="page-item active" aria-current="page"><span class="page-link">Page {{ page_obj.number }} of {{ paginator.num_pages }}</span></li>
+                {% if page_obj.has_next %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

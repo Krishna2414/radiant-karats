@@ -1,4 +1,7 @@
 from django.shortcuts import render
+from django.views import generic
+
+from .models import Ring
 
 
 def home(request):
@@ -29,3 +32,12 @@ def home(request):
         },
     ]
     return render(request, "rings/index.html", {"rings": rings})
+
+
+class RingList(generic.ListView):
+    """The All rings page: every ring, nine rings a page."""
+
+    model = Ring
+    template_name = "rings/ring_list.html"
+    context_object_name = "rings"
+    paginate_by = 9
