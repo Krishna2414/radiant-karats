@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from django.views import generic
 
 from .models import Ring
@@ -41,3 +41,9 @@ class RingList(generic.ListView):
     template_name = "rings/ring_list.html"
     context_object_name = "rings"
     paginate_by = 9
+
+
+def ring_detail(request, slug):
+    """One ring's own page, or the 404 page if no ring has that slug."""
+    ring = get_object_or_404(Ring, slug=slug)
+    return render(request, "rings/ring_detail.html", {"ring": ring})

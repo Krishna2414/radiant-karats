@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ ring.name }}{% endblock %}
+
+{% block content %}
+<section class="collection-section">
+    <div class="container">
+        <nav aria-label="Breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'ring_list' %}">All rings</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ ring.name }}</li>
+            </ol>
+        </nav>
+
+        <div class="row g-4 g-lg-5">
+            <div class="col-md-6">
+                <div class="ring-photo">
+                    {% if ring.photo_url %}
+                    <img src="{{ ring.photo_url }}" alt="{{ ring.alt_text }}">
+                    {% else %}
+                    <img src="{% static ring.placeholder_image %}" alt="{{ ring.get_style_display }} ring drawing" width="400" height="300">
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <p class="eyebrow">{{ ring.get_style_display }} ring</p>
+                <h1>{{ ring.name }}</h1>
+                <p class="ring-price fs-4">£{{ ring.price|floatformat:"-2g" }}</p>
+
+                <dl class="row ring-facts">
+                    <dt class="col-4">Style</dt>
+                    <dd class="col-8">{{ ring.get_style_display }}</dd>
+                    <dt class="col-4">Metal</dt>
+                    <dd class="col-8">{{ ring.get_metal_display }}</dd>
+                    <dt class="col-4">Gemstone</dt>
+                    <dd class="col-8">{{ ring.get_gemstone_display }}</dd>
+                    <dt class="col-4">Added by</dt>
+                    <dd class="col-8">{{ ring.owner.username }}</dd>
+                    <dt class="col-4">Added on</dt>
+                    <dd class="col-8"><time datetime="{{ ring.created_on|date:'Y-m-d' }}">{{ ring.created_on|date:"j F Y" }}</time></dd>
+                </dl>
+
+                <h2 class="h4">About this ring</h2>
+                <p>{{ ring.description|linebreaksbr }}</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

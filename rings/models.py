@@ -6,6 +6,7 @@ from cloudinary.models import CloudinaryField
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.urls import reverse
 from django.utils.text import slugify
 
 # The ring pages will use the addresses /rings/add/ and /rings/mine/,
@@ -76,6 +77,10 @@ class Ring(models.Model):
         if not self.slug:
             self.slug = self.make_unique_slug()
         super().save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        """The address of this ring's own page."""
+        return reverse("ring_detail", args=[self.slug])
 
     def make_unique_slug(self):
         """Slugify the name, then add a number until no ring uses it."""

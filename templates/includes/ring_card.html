@@ -9,7 +9,7 @@
     </div>
     <div class="ring-info">
         <div>
-            <{{ heading|default:"h2" }}>{{ ring.name }}</{{ heading|default:"h2" }}>
+                        <{{ heading|default:"h2" }}><a class="stretched-link" href="{{ ring.get_absolute_url }}">{{ ring.name }}</a></{{ heading|default:"h2" }}>
             <p>{{ ring.get_style_display }} · {{ ring.get_metal_display }}</p>
         </div>
         <span class="ring-price">£{{ ring.price|floatformat:"-2g" }}</span>
