@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% if ring %}Edit {{ ring.name }}{% else %}Add a ring{% endif %}{% endblock %}
+
+{% block content %}
+<section class="collection-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <p class="eyebrow">Your collection</p>
+                <h1>{% if ring %}Edit {{ ring.name }}{% else %}Add a ring{% endif %}</h1>
+                <p class="section-intro mb-4">Tell people about your ring. Only you can edit or delete it.</p>
+
+                <form method="post" enctype="multipart/form-data" class="form-card">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <div class="d-flex flex-wrap gap-2">
+                        <button type="submit" class="btn btn-gold">{% if ring %}Save changes{% else %}Add ring{% endif %}</button>
+                        <a class="btn btn-outline-ink" href="{% if ring %}{{ ring.get_absolute_url }}{% else %}{% url 'ring_list' %}{% endif %}">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

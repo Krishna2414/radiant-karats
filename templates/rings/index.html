@@ -52,7 +52,11 @@
                 <h2>Your idea, your ring.</h2>
                 <p>Have a design in mind? Join us and start building a collection that is uniquely yours.</p>
             </div>
-            <a class="btn btn-outline-gold" href="{% url 'account_signup' %}">Create an account</a>
+            {% if user.is_authenticated %}
+                <a class="btn btn-outline-gold" href="{% url 'ring_create' %}">Add a ring</a>
+            {% else %}
+                <a class="btn btn-outline-gold" href="{% url 'account_signup' %}">Create an account</a>
+            {% endif %}
         </div>
     </div>
 </section>

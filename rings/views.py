@@ -1,6 +1,9 @@
-from django.shortcuts import get_object_or_404, render
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect, render
 from django.views import generic
 
+from .forms import RingForm
 from .models import Ring
 
 
@@ -47,3 +50,20 @@ def ring_detail(request, slug):
     """One ring's own page, or the 404 page if no ring has that slug."""
     ring = get_object_or_404(Ring, slug=slug)
     return render(request, "rings/ring_detail.html", {"ring": ring})
+
+
+@login_required
+def ring_create(request):
+    """Add a new ring. The signed-in user becomes its owner."""
+    if request.method == "POST":
+        form = RingForm(request.POST, request.FILES)
+        if form.is_valid():
+            ring = form.save(commit=False)
+            ring.owner = request.user
+            ring.save()
+            messages.success(request, f"{ring.name} has been added.")
+            return redirect(ring)
+        messages.error(request, "Please check the form for errors.")
+    else:
+        form = RingForm()
+    return render(request, "rings/ring_form.html", {"form": form})
