@@ -78,6 +78,12 @@ class Ring(models.Model):
             self.slug = self.make_unique_slug()
         super().save(*args, **kwargs)
 
+    def can_be_changed_by(self, user):
+        """Only the ring's owner, or the site owner (staff), may change it."""
+        if not user.is_authenticated:
+            return False
+        return user == self.owner or user.is_staff
+
     def get_absolute_url(self):
         """The address of this ring's own page."""
         return reverse("ring_detail", args=[self.slug])

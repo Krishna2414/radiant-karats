@@ -2,7 +2,7 @@ from decimal import Decimal
 from unittest import mock
 
 import cloudinary.exceptions
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AnonymousUser, User
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.urls import reverse
@@ -284,3 +284,93 @@ class RingCreateTests(TestCase):
         self.assertContains(response, "Please check the form for errors.")
         self.assertContains(response, "Solitaire rings need a gemstone.")
         self.assertFalse(Ring.objects.exists())
+
+
+class RingEditTests(TestCase):
+    """The Edit ring page, from the Edit my ring story."""
+
+    def setUp(self):
+        self.owner = User.objects.create_user("amy", password="Test-pass-123")
+        self.other = User.objects.create_user("ben", password="Test-pass-123")
+        self.staff = User.objects.create_user(
+            "sam", password="Test-pass-123", is_staff=True
+        )
+        self.ring = make_ring(
+            self.owner, name="Aurora", gemstone=Ring.Gemstone.DIAMOND
+        )
+        self.url = reverse("ring_edit", args=[self.ring.slug])
+        self.edit_link = f'href="{self.url}"'
+
+    def test_only_the_owner_and_staff_can_change_a_ring(self):
+        self.assertTrue(self.ring.can_be_changed_by(self.owner))
+        self.assertTrue(self.ring.can_be_changed_by(self.staff))
+        self.assertFalse(self.ring.can_be_changed_by(self.other))
+        self.assertFalse(self.ring.can_be_changed_by(AnonymousUser()))
+
+    def test_visitors_and_other_users_do_not_see_edit(self):
+        ring_page = self.ring.get_absolute_url()
+        self.assertNotContains(self.client.get(ring_page), self.edit_link)
+        self.client.force_login(self.other)
+        self.assertNotContains(self.client.get(ring_page), self.edit_link)
+
+    def test_the_owner_and_staff_see_edit(self):
+        ring_page = self.ring.get_absolute_url()
+        self.client.force_login(self.owner)
+        self.assertContains(self.client.get(ring_page), self.edit_link)
+        self.client.force_login(self.staff)
+        self.assertContains(self.client.get(ring_page), self.edit_link)
+
+    def test_visitors_are_sent_to_log_in(self):
+        response = self.client.get(self.url)
+        login_url = reverse("account_login")
+        self.assertRedirects(response, f"{login_url}?next={self.url}")
+
+    def test_other_users_cannot_edit(self):
+        self.client.force_login(self.other)
+        self.assertEqual(self.client.get(self.url).status_code, 403)
+        response = self.client.post(self.url, form_details(name="Taken"))
+        self.assertEqual(response.status_code, 403)
+        self.ring.refresh_from_db()
+        self.assertEqual(self.ring.name, "Aurora")
+
+    def test_form_shows_the_current_details(self):
+        self.client.force_login(self.owner)
+        response = self.client.get(self.url)
+        self.assertTemplateUsed(response, "rings/ring_form.html")
+        self.assertEqual(response.context["form"].instance, self.ring)
+        self.assertContains(response, 'value="Aurora"')
+        self.assertContains(response, "Save changes")
+
+    def test_owner_saves_changes_and_sees_a_message(self):
+        self.client.force_login(self.owner)
+        details = form_details(name="Aurora Classic", price="1400")
+        response = self.client.post(self.url, details, follow=True)
+        self.ring.refresh_from_db()
+        self.assertEqual(self.ring.name, "Aurora Classic")
+        self.assertEqual(self.ring.price, Decimal("1400"))
+        self.assertRedirects(response, self.ring.get_absolute_url())
+        self.assertContains(response, "Aurora Classic has been updated.")
+
+    def test_staff_can_edit_any_ring(self):
+        self.client.force_login(self.staff)
+        self.client.post(self.url, form_details(price="999"))
+        self.ring.refresh_from_db()
+        self.assertEqual(self.ring.price, Decimal("999"))
+
+    def test_leaving_the_photo_empty_keeps_the_old_one(self):
+        self.ring.image = "old-photo"
+        self.ring.save()
+        self.client.force_login(self.owner)
+        self.client.post(self.url, form_details(price="1300"))
+        self.ring.refresh_from_db()
+        self.assertEqual(self.ring.price, Decimal("1300"))
+        self.assertIn("old-photo", self.ring.photo_url)
+
+    @mock.patch("cloudinary.uploader.upload", return_value=FAKE_UPLOAD)
+    def test_a_new_photo_replaces_the_old_one(self, upload):
+        self.ring.image = "old-photo"
+        self.ring.save()
+        self.client.force_login(self.owner)
+        self.client.post(self.url, form_details(image=photo_file()))
+        self.ring.refresh_from_db()
+        self.assertIn("test-photo", self.ring.photo_url)

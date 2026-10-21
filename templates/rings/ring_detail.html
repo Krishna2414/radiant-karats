@@ -43,6 +43,11 @@
 
                 <h2 class="h4">About this ring</h2>
                 <p>{{ ring.description|linebreaksbr }}</p>
+                {% if can_change %}
+                    <div class="d-flex flex-wrap gap-2 mt-4">
+                        <a class="btn btn-ink" href="{% url 'ring_edit' ring.slug %}">Edit ring</a>
+                    </div>
+                {% endif %}
             </div>
         </div>
     </div>

@@ -42,7 +42,8 @@ class RingForm(forms.ModelForm):
         options={"allowed_formats": ["jpg", "png", "webp"]},
         widget=forms.FileInput(attrs={"accept": "image/*"}),
         help_text=f"Optional. A JPG, PNG or WebP photo under {MAX_PHOTO_MB} "
-        "MB. Until there is one, your ring shows a drawing of its style.",
+        "MB. Until there is one, your ring shows a drawing of its style. "
+        "When you edit a ring, leave this empty to keep its photo.",
     )
 
     class Meta:

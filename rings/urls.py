@@ -7,4 +7,5 @@ urlpatterns = [
     path("rings/", views.RingList.as_view(), name="ring_list"),
     path("rings/add/", views.ring_create, name="ring_create"),
     path("rings/<slug:slug>/", views.ring_detail, name="ring_detail"),
+    path("rings/<slug:slug>/edit/", views.ring_edit, name="ring_edit"),
 ]

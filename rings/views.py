@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views import generic
 
@@ -49,7 +50,11 @@ class RingList(generic.ListView):
 def ring_detail(request, slug):
     """One ring's own page, or the 404 page if no ring has that slug."""
     ring = get_object_or_404(Ring, slug=slug)
-    return render(request, "rings/ring_detail.html", {"ring": ring})
+    context = {
+        "ring": ring,
+        "can_change": ring.can_be_changed_by(request.user),
+    }
+    return render(request, "rings/ring_detail.html", context)
 
 
 @login_required
@@ -67,3 +72,22 @@ def ring_create(request):
     else:
         form = RingForm()
     return render(request, "rings/ring_form.html", {"form": form})
+
+
+@login_required
+def ring_edit(request, slug):
+    """Edit a ring. Only its owner, or staff, may do this."""
+    ring = get_object_or_404(Ring, slug=slug)
+    if not ring.can_be_changed_by(request.user):
+        raise PermissionDenied
+    if request.method == "POST":
+        form = RingForm(request.POST, request.FILES, instance=ring)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"{ring.name} has been updated.")
+            return redirect(ring)
+        messages.error(request, "Please check the form for errors.")
+    else:
+        form = RingForm(instance=ring)
+    context = {"form": form, "ring": ring}
+    return render(request, "rings/ring_form.html", context)
