@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}My rings{% endblock %}
+
+{% block content %}
+<section class="collection-section">
+    <div class="container">
+        <div class="section-heading">
+            <div>
+                <p class="eyebrow">Your collection</p>
+                <h1>My rings</h1>
+            </div>
+            <a class="btn btn-gold" href="{% url 'ring_create' %}">Add a ring</a>
+        </div>
+
+        {% if rings %}
+        <div class="row g-4">
+            {% for ring in rings %}
+            <div class="col-md-6 col-lg-4 d-flex flex-column">
+                {% include "includes/ring_card.html" %}
+                <div class="d-flex gap-2 mt-2">
+                    <a class="btn btn-sm btn-outline-ink" href="{% url 'ring_edit' ring.slug %}">Edit<span class="visually-hidden"> {{ ring.name }}</span></a>
+                    <a class="btn btn-sm btn-outline-danger" href="{% url 'ring_delete' ring.slug %}">Delete<span class="visually-hidden"> {{ ring.name }}</span></a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <p>You haven't added any rings yet.</p>
+            <a class="btn btn-gold" href="{% url 'ring_create' %}">Add your first ring</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

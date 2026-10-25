@@ -46,10 +46,33 @@
                 {% if can_change %}
                     <div class="d-flex flex-wrap gap-2 mt-4">
                         <a class="btn btn-ink" href="{% url 'ring_edit' ring.slug %}">Edit ring</a>
+                                                <a class="btn btn-outline-danger" href="{% url 'ring_delete' ring.slug %}" data-bs-toggle="modal" data-bs-target="#delete-modal">Delete ring</a>
                     </div>
                 {% endif %}
             </div>
         </div>
     </div>
 </section>
+{% if can_change %}
+<div class="modal fade" id="delete-modal" tabindex="-1" role="dialog" aria-labelledby="delete-modal-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title fs-5" id="delete-modal-title">Delete {{ ring.name }}?</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-0">This removes the ring for good. You can't undo it.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-ink" data-bs-dismiss="modal">Keep it</button>
+                <form method="post" action="{% url 'ring_delete' ring.slug %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete ring</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
 {% endblock %}

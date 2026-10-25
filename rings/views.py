@@ -91,3 +91,25 @@ def ring_edit(request, slug):
         form = RingForm(instance=ring)
     context = {"form": form, "ring": ring}
     return render(request, "rings/ring_form.html", context)
+
+
+@login_required
+def ring_delete(request, slug):
+    """Delete a ring, but only on a POST. Only its owner, or staff."""
+    ring = get_object_or_404(Ring, slug=slug)
+    if not ring.can_be_changed_by(request.user):
+        raise PermissionDenied
+    if request.method == "POST":
+        ring.delete()
+        messages.success(request, f"{ring.name} has been deleted.")
+        if ring.owner == request.user:
+            return redirect("my_rings")
+        return redirect("ring_list")
+    return render(request, "rings/ring_confirm_delete.html", {"ring": ring})
+
+
+@login_required
+def my_rings(request):
+    """The signed-in user's own rings, newest first."""
+    rings = request.user.rings.all()
+    return render(request, "rings/my_rings.html", {"rings": rings})

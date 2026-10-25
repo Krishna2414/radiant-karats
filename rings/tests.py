@@ -374,3 +374,96 @@ class RingEditTests(TestCase):
         self.client.post(self.url, form_details(image=photo_file()))
         self.ring.refresh_from_db()
         self.assertIn("test-photo", self.ring.photo_url)
+
+
+class MyRingsTests(TestCase):
+    """The My rings page, where the Delete story takes you afterwards."""
+
+    def setUp(self):
+        self.owner = User.objects.create_user("amy", password="Test-pass-123")
+        self.other = User.objects.create_user("ben", password="Test-pass-123")
+        self.url = reverse("my_rings")
+
+    def test_visitors_are_sent_to_log_in(self):
+        response = self.client.get(self.url)
+        login_url = reverse("account_login")
+        self.assertRedirects(response, f"{login_url}?next={self.url}")
+
+    def test_only_signed_in_users_see_my_rings_in_the_navbar(self):
+        link = f'href="{self.url}"'
+        self.assertNotContains(self.client.get(reverse("home")), link)
+        self.client.force_login(self.owner)
+        self.assertContains(self.client.get(reverse("home")), link)
+
+    def test_lists_only_my_rings_with_edit_and_delete(self):
+        mine = make_ring(self.owner, name="Aurora")
+        make_ring(self.other, name="Borealis")
+        self.client.force_login(self.owner)
+        response = self.client.get(self.url)
+        self.assertContains(response, "Aurora")
+        self.assertNotContains(response, "Borealis")
+        self.assertContains(response, reverse("ring_edit", args=[mine.slug]))
+        self.assertContains(response, reverse("ring_delete", args=[mine.slug]))
+
+    def test_message_shows_when_i_have_no_rings(self):
+        self.client.force_login(self.owner)
+        response = self.client.get(self.url)
+        self.assertContains(response, "You haven't added any rings yet.")
+
+
+class RingDeleteTests(TestCase):
+    """Deleting a ring, from the Delete my ring story."""
+
+    def setUp(self):
+        self.owner = User.objects.create_user("amy", password="Test-pass-123")
+        self.other = User.objects.create_user("ben", password="Test-pass-123")
+        self.staff = User.objects.create_user(
+            "sam", password="Test-pass-123", is_staff=True
+        )
+        self.ring = make_ring(self.owner, name="Aurora")
+        self.url = reverse("ring_delete", args=[self.ring.slug])
+
+    def test_visitors_and_other_users_do_not_see_delete(self):
+        ring_page = self.ring.get_absolute_url()
+        self.assertNotContains(self.client.get(ring_page), self.url)
+        self.client.force_login(self.other)
+        self.assertNotContains(self.client.get(ring_page), self.url)
+
+    def test_the_owner_and_staff_see_delete(self):
+        ring_page = self.ring.get_absolute_url()
+        self.client.force_login(self.owner)
+        self.assertContains(self.client.get(ring_page), self.url)
+        self.client.force_login(self.staff)
+        self.assertContains(self.client.get(ring_page), self.url)
+
+    def test_opening_the_address_asks_first_and_deletes_nothing(self):
+        self.client.force_login(self.owner)
+        response = self.client.get(self.url)
+        self.assertTemplateUsed(response, "rings/ring_confirm_delete.html")
+        self.assertContains(response, "Delete Aurora?")
+        self.assertTrue(Ring.objects.filter(pk=self.ring.pk).exists())
+
+    def test_visitors_are_sent_to_log_in(self):
+        response = self.client.post(self.url)
+        login_url = reverse("account_login")
+        self.assertRedirects(response, f"{login_url}?next={self.url}")
+        self.assertTrue(Ring.objects.filter(pk=self.ring.pk).exists())
+
+    def test_other_users_cannot_delete(self):
+        self.client.force_login(self.other)
+        self.assertEqual(self.client.get(self.url).status_code, 403)
+        self.assertEqual(self.client.post(self.url).status_code, 403)
+        self.assertTrue(Ring.objects.filter(pk=self.ring.pk).exists())
+
+    def test_owner_deletes_and_goes_to_my_rings_with_a_message(self):
+        self.client.force_login(self.owner)
+        response = self.client.post(self.url, follow=True)
+        self.assertFalse(Ring.objects.filter(pk=self.ring.pk).exists())
+        self.assertRedirects(response, reverse("my_rings"))
+        self.assertContains(response, "Aurora has been deleted.")
+
+    def test_staff_can_delete_any_ring(self):
+        self.client.force_login(self.staff)
+        response = self.client.post(self.url)
+        self.assertFalse(Ring.objects.filter(pk=self.ring.pk).exists())
+        self.assertRedirects(response, reverse("ring_list"))
