@@ -512,3 +512,51 @@ class RingSafetyTests(TestCase):
                 response = self.client.post(url, form_details(name="Taken"))
                 self.assertRedirects(response, expected)
                 self.assert_ring_unchanged()
+
+
+
+class SiteOwnerTests(TestCase):
+    """Managing every ring as the site owner (staff)."""
+
+    def setUp(self):
+        self.user = User.objects.create_user("amy", password="Test-pass-123")
+        self.staff = User.objects.create_superuser(
+            "sam", password="Test-pass-123"
+        )
+        make_ring(self.user, name="Aurora")
+        make_ring(self.user, name="Borealis", style=Ring.Style.BAND)
+
+    def test_staff_see_edit_and_delete_on_every_ring(self):
+        self.client.force_login(self.staff)
+        for ring in Ring.objects.all():
+            with self.subTest(ring=ring.name):
+                response = self.client.get(ring.get_absolute_url())
+                edit_url = reverse("ring_edit", args=[ring.slug])
+                delete_url = reverse("ring_delete", args=[ring.slug])
+                self.assertContains(response, edit_url)
+                self.assertContains(response, delete_url)
+
+    def test_only_staff_see_the_admin_link(self):
+        admin_link = f'href="{reverse("admin:index")}"'
+        self.client.force_login(self.user)
+        self.assertNotContains(self.client.get(reverse("home")), admin_link)
+        self.client.force_login(self.staff)
+        self.assertContains(self.client.get(reverse("home")), admin_link)
+
+    def test_admin_lists_rings_with_filters_and_a_search(self):
+        self.client.force_login(self.staff)
+        url = reverse("admin:rings_ring_changelist")
+        response = self.client.get(url)
+        self.assertContains(response, "Aurora")
+        self.assertContains(response, "Borealis")
+        self.assertContains(response, "By style")
+        self.assertContains(response, 'id="searchbar"')
+
+        searched = self.client.get(url, {"q": "Borealis"})
+        self.assertContains(searched, "Borealis")
+        self.assertNotContains(searched, "Aurora")
+
+        filtered = self.client.get(url, {"style__exact": "band"})
+        self.assertContains(filtered, "Borealis")
+        self.assertNotContains(filtered, "Aurora")
+        
