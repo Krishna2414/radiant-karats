@@ -28,6 +28,11 @@
     --bs-link-hover-color-rgb: 28, 36, 48;
     --bs-secondary-color: var(--rk-muted);
 }
+/* Ring names, usernames and descriptions can hold very long words or
+   links. This lets them wrap, so they never push the page sideways. */
+body {
+    overflow-wrap: anywhere;
+}
 
 h1,
 h2,

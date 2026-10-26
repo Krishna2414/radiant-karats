@@ -63,7 +63,11 @@ class RingForm(forms.ModelForm):
             "a gemstone.",
             "price": "The price in pounds: £1 or more.",
         }
-        widgets = {"description": forms.Textarea(attrs={"rows": 5})}
+        widgets = {
+            "description": forms.Textarea(attrs={"rows": 5}),
+            # Phones show a number keypad with a decimal point.
+            "price": forms.NumberInput(attrs={"inputmode": "decimal"}),
+        }
 
     def clean(self):
         """A ring built around a stone needs a gemstone."""

@@ -514,7 +514,6 @@ class RingSafetyTests(TestCase):
                 self.assert_ring_unchanged()
 
 
-
 class SiteOwnerTests(TestCase):
     """Managing every ring as the site owner (staff)."""
 
@@ -559,4 +558,21 @@ class SiteOwnerTests(TestCase):
         filtered = self.client.get(url, {"style__exact": "band"})
         self.assertContains(filtered, "Borealis")
         self.assertNotContains(filtered, "Aurora")
-        
+
+
+class AnyDeviceTests(TestCase):
+    """The parts of the Use it on any device story that code can check."""
+
+    def test_pages_scale_to_the_screen(self):
+        response = self.client.get(reverse("home"))
+        self.assertContains(
+            response, 'content="width=device-width, initial-scale=1"'
+        )
+
+    def test_the_navbar_folds_into_a_menu(self):
+        response = self.client.get(reverse("home"))
+        self.assertContains(response, "navbar-expand-lg")
+        self.assertContains(response, 'class="navbar-toggler"')
+
+    def test_price_box_opens_the_number_keypad_on_phones(self):
+        self.assertIn('inputmode="decimal"', str(RingForm()["price"]))
