@@ -467,3 +467,48 @@ class RingDeleteTests(TestCase):
         response = self.client.post(self.url)
         self.assertFalse(Ring.objects.filter(pk=self.ring.pk).exists())
         self.assertRedirects(response, reverse("ring_list"))
+
+
+class RingSafetyTests(TestCase):
+    """Nobody else can change my rings: the Keep my rings safe story."""
+
+    def setUp(self):
+        self.owner = User.objects.create_user("amy", password="Test-pass-123")
+        self.other = User.objects.create_user("ben", password="Test-pass-123")
+        self.ring = make_ring(self.owner, name="Aurora")
+        self.edit_url = reverse("ring_edit", args=[self.ring.slug])
+        self.delete_url = reverse("ring_delete", args=[self.ring.slug])
+
+    def assert_ring_unchanged(self):
+        """The ring still exists, with its old name."""
+        self.ring.refresh_from_db()
+        self.assertEqual(self.ring.name, "Aurora")
+
+    def test_other_users_see_no_edit_or_delete_buttons(self):
+        self.client.force_login(self.other)
+        response = self.client.get(self.ring.get_absolute_url())
+        self.assertNotContains(response, self.edit_url)
+        self.assertNotContains(response, self.delete_url)
+
+    def test_other_users_who_type_the_address_see_the_403_page(self):
+        self.client.force_login(self.other)
+        for url in [self.edit_url, self.delete_url]:
+            with self.subTest(url=url):
+                response = self.client.get(url)
+                self.assertTemplateUsed(response, "403.html")
+                self.assertContains(
+                    response, "You can't do that", status_code=403
+                )
+                response = self.client.post(url, form_details(name="Taken"))
+                self.assertEqual(response.status_code, 403)
+                self.assert_ring_unchanged()
+
+    def test_visitors_are_sent_to_log_in(self):
+        login_url = reverse("account_login")
+        for url in [self.edit_url, self.delete_url]:
+            with self.subTest(url=url):
+                expected = f"{login_url}?next={url}"
+                self.assertRedirects(self.client.get(url), expected)
+                response = self.client.post(url, form_details(name="Taken"))
+                self.assertRedirects(response, expected)
+                self.assert_ring_unchanged()
