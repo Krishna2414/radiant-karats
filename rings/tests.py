@@ -1,5 +1,6 @@
 from decimal import Decimal
 from unittest import mock
+from datetime import timedelta
 
 import cloudinary.exceptions
 from django.contrib.auth.models import AnonymousUser, User
@@ -24,16 +25,37 @@ def make_ring(owner, name="Aurora", **details):
     return Ring.objects.create(owner=owner, name=name, **fields)
 
 
-class RingStoreHomeTests(TestCase):
-    def test_homepage_shows_ring_storefront(self):
-        response = self.client.get("/")
+class HomePageTests(TestCase):
+    """The home page, from the See the newest rings story."""
 
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Radiant Karats")
-        self.assertContains(response, "Solstice Solitaire")
-        self.assertContains(response, "The Heirloom")
-        self.assertContains(response, "Golden Hour Band")
-        self.assertNotContains(response, "Helping Hands")
+    def setUp(self):
+        self.owner = User.objects.create_user("amy", password="Test-pass-123")
+
+    def test_home_page_shows_the_three_newest_rings(self):
+        now = timezone.now()
+        names = ["Newest", "Second", "Third", "Oldest"]
+        for days_old, name in enumerate(names):
+            ring = make_ring(self.owner, name=name)
+            Ring.objects.filter(pk=ring.pk).update(
+                created_on=now - timedelta(days=days_old)
+            )
+        response = self.client.get(reverse("home"))
+        shown = [ring.name for ring in response.context["latest_rings"]]
+        self.assertEqual(shown, ["Newest", "Second", "Third"])
+        self.assertNotContains(response, "Oldest")
+
+    def test_message_shows_when_there_are_no_rings_yet(self):
+        response = self.client.get(reverse("home"))
+        self.assertContains(response, "No rings yet")
+
+    def test_see_all_rings_opens_the_all_rings_page(self):
+        link = f'href="{reverse("ring_list")}">See all rings'
+        self.assertContains(self.client.get(reverse("home")), link)
+
+    def test_newest_rings_link_to_their_own_pages(self):
+        ring = make_ring(self.owner, name="Aurora")
+        response = self.client.get(reverse("home"))
+        self.assertContains(response, f'href="{ring.get_absolute_url()}"')
 
 
 class RingModelTests(TestCase):

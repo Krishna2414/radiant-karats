@@ -21,30 +21,25 @@
         <div class="section-heading">
             <div>
                 <p class="eyebrow">The collection</p>
-                <h2>Made for your moments</h2>
+                <h2>Latest rings</h2>
+                <p class="section-intro">From everyday pieces to once-in-a-lifetime rings, find a piece worth passing down.</p>
             </div>
-            <p class="section-intro">From everyday pieces to once-in-a-lifetime rings, find a piece worth passing down.</p>
+            <a class="btn btn-outline-gold" href="{% url 'ring_list' %}">See all rings</a>
         </div>
 
+        {% if latest_rings %}
         <div class="row g-4">
-            {% for ring in rings %}
+            {% for ring in latest_rings %}
             <div class="col-md-6 col-lg-4">
-                <article class="ring-card">
-                    <div class="ring-image-wrap">
-                        <img class="ring-image" src="{{ ring.image }}" alt="{{ ring.alt }}" loading="lazy">
-                        <span class="ring-label">{{ ring.label }}</span>
-                    </div>
-                    <div class="ring-info">
-                        <div>
-                            <h3>{{ ring.name }}</h3>
-                            <p>{{ ring.detail }}</p>
-                        </div>
-                        <span class="ring-price">{{ ring.price }}</span>
-                    </div>
-                </article>
+                {% include "includes/ring_card.html" with heading="h3" %}
             </div>
             {% endfor %}
         </div>
+        {% else %}
+        <div class="empty-state">
+            <p class="mb-0">No rings yet. Be the first to add one!</p>
+        </div>
+        {% endif %}
 
         <div class="custom-ring">
             <div>
