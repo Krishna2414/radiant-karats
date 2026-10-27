@@ -7,6 +7,21 @@ from django.views import generic
 from .forms import RingForm
 from .models import Ring
 
+# The Sort menu on All rings: the value in the address, then the label.
+SORT_OPTIONS = {
+    "newest": "Newest first",
+    "price_low": "Price: low to high",
+    "price_high": "Price: high to low",
+}
+
+# How each choice orders the rings. Rings with the same price stay
+# newest first, so they never swap places between pages.
+SORT_ORDERS = {
+    "newest": ["-created_on"],
+    "price_low": ["price", "-created_on"],
+    "price_high": ["-price", "-created_on"],
+}
+
 
 def home(request):
     """The home page, with the three newest rings."""
@@ -19,8 +34,8 @@ def home(request):
 class RingList(generic.ListView):
     """The All rings page: every ring, nine rings a page.
 
-    ?style=halo shows only halo rings. A style that doesn't exist, such
-    as ?style=banana, is ignored, so every ring shows.
+    ?style=halo shows only halo rings, and ?sort=price_low sorts them by
+    price. Values that don't exist, such as ?style=banana, are ignored.
     """
 
     model = Ring
@@ -35,12 +50,19 @@ class RingList(generic.ListView):
             return style
         return ""
 
+    def get_sort(self):
+        """The order chosen in the Sort menu, or "newest" if none is."""
+        sort = self.request.GET.get("sort", "")
+        if sort in SORT_OPTIONS:
+            return sort
+        return "newest"
+
     def get_queryset(self):
         rings = Ring.objects.all()
         style = self.get_style()
         if style:
             rings = rings.filter(style=style)
-        return rings
+        return rings.order_by(*SORT_ORDERS[self.get_sort()])
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -48,6 +70,8 @@ class RingList(generic.ListView):
         context["style"] = style
         context["style_name"] = Ring.Style(style).label if style else ""
         context["styles"] = Ring.Style.choices
+        context["sort"] = self.get_sort()
+        context["sort_options"] = SORT_OPTIONS
         return context
 
 

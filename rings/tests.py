@@ -644,4 +644,66 @@ class StyleFilterTests(TestCase):
         for number in range(1, 11):
             make_ring(owner, name=f"Halo {number}", style=Ring.Style.HALO)
         response = self.client.get(self.url, {"style": "halo"})
-        self.assertContains(response, 'href="?style=halo&amp;page=2"')
+        link = 'href="?style=halo&amp;sort=newest&amp;page=2"'
+        self.assertContains(response, link)
+
+
+class SortTests(TestCase):
+    """The Sort menu on All rings, from the Sort by price story."""
+
+    def setUp(self):
+        self.owner = User.objects.create_user("amy", password="Test-pass-123")
+        self.url = reverse("ring_list")
+        now = timezone.now()
+        # Made 0, 1 and 2 days ago, so the newest is "Middle".
+        rings = [("Middle", "500"), ("Cheapest", "100"), ("Dearest", "900")]
+        for days_old, (name, price) in enumerate(rings):
+            ring = make_ring(self.owner, name=name, price=Decimal(price))
+            Ring.objects.filter(pk=ring.pk).update(
+                created_on=now - timedelta(days=days_old)
+            )
+
+    def names_in_order(self, **choices):
+        response = self.client.get(self.url, choices)
+        return [ring.name for ring in response.context["rings"]]
+
+    def test_the_sort_menu_has_three_choices(self):
+        response = self.client.get(self.url)
+        for value in ["newest", "price_low", "price_high"]:
+            self.assertContains(response, f'<option value="{value}"')
+
+    def test_newest_first_is_the_default(self):
+        self.assertEqual(
+            self.names_in_order(), ["Middle", "Cheapest", "Dearest"]
+        )
+
+    def test_price_low_to_high(self):
+        self.assertEqual(
+            self.names_in_order(sort="price_low"),
+            ["Cheapest", "Middle", "Dearest"],
+        )
+
+    def test_price_high_to_low(self):
+        self.assertEqual(
+            self.names_in_order(sort="price_high"),
+            ["Dearest", "Middle", "Cheapest"],
+        )
+
+    def test_unknown_values_in_the_address_are_ignored(self):
+        self.assertEqual(
+            self.names_in_order(style="banana", sort="banana"),
+            ["Middle", "Cheapest", "Dearest"],
+        )
+
+    def test_the_filter_and_sort_stay_when_i_change_page(self):
+        for number in range(1, 11):
+            make_ring(self.owner, name=f"Halo {number}",
+                      style=Ring.Style.HALO, price=Decimal(number))
+        choices = {"style": "halo", "sort": "price_high"}
+        first_page = self.client.get(self.url, choices)
+        link = 'href="?style=halo&amp;sort=price_high&amp;page=2"'
+        self.assertContains(first_page, link)
+        second_page = self.client.get(self.url, {**choices, "page": 2})
+        self.assertContains(second_page, "selected>Price: high to low")
+        names = [ring.name for ring in second_page.context["rings"]]
+        self.assertEqual(names, ["Halo 1"])
