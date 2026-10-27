@@ -707,3 +707,45 @@ class SortTests(TestCase):
         self.assertContains(second_page, "selected>Price: high to low")
         names = [ring.name for ring in second_page.context["rings"]]
         self.assertEqual(names, ["Halo 1"])
+
+
+class ErrorPageTests(TestCase):
+    """The 404 and 403 pages, from the Helpful error pages story."""
+
+    def setUp(self):
+        self.owner = User.objects.create_user("amy", password="Test-pass-123")
+        self.other = User.objects.create_user("ben", password="Test-pass-123")
+        self.ring = make_ring(self.owner, name="Aurora")
+
+    def test_a_missing_page_shows_the_404_page_with_links_back(self):
+        for url in ["/no-such-page/", "/rings/no-such-ring/"]:
+            with self.subTest(url=url):
+                response = self.client.get(url)
+                self.assertTemplateUsed(response, "404.html")
+                self.assertContains(
+                    response, "We can't find that page", status_code=404
+                )
+                for name in ["home", "ring_list"]:
+                    link = f'href="{reverse(name)}"'
+                    self.assertContains(response, link, status_code=404)
+
+    def test_a_forbidden_action_shows_the_403_page(self):
+        self.client.force_login(self.other)
+        response = self.client.get(
+            reverse("ring_edit", args=[self.ring.slug])
+        )
+        self.assertTemplateUsed(response, "403.html")
+        self.assertContains(response, "You can't do that", status_code=403)
+
+    def test_both_pages_match_the_rest_of_the_site(self):
+        self.client.force_login(self.other)
+        missing = self.client.get("/no-such-page/")
+        forbidden = self.client.get(
+            reverse("ring_delete", args=[self.ring.slug])
+        )
+        for response in [missing, forbidden]:
+            with self.subTest(status=response.status_code):
+                self.assertTemplateUsed(response, "base.html")
+                self.assertContains(
+                    response, "Signed in as", status_code=response.status_code
+                )
