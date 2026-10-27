@@ -399,7 +399,7 @@ class RingEditTests(TestCase):
 
 
 class MyRingsTests(TestCase):
-    """The My rings page, where the Delete story takes you afterwards."""
+    """The My rings page, from the See my rings story."""
 
     def setUp(self):
         self.owner = User.objects.create_user("amy", password="Test-pass-123")
@@ -427,10 +427,11 @@ class MyRingsTests(TestCase):
         self.assertContains(response, reverse("ring_edit", args=[mine.slug]))
         self.assertContains(response, reverse("ring_delete", args=[mine.slug]))
 
-    def test_message_shows_when_i_have_no_rings(self):
+    def test_message_and_add_button_show_when_i_have_no_rings(self):
         self.client.force_login(self.owner)
         response = self.client.get(self.url)
         self.assertContains(response, "You haven't added any rings yet.")
+        self.assertContains(response, "Add your first ring")
 
 
 class RingDeleteTests(TestCase):
