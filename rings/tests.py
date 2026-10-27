@@ -599,3 +599,49 @@ class AnyDeviceTests(TestCase):
 
     def test_price_box_opens_the_number_keypad_on_phones(self):
         self.assertIn('inputmode="decimal"', str(RingForm()["price"]))
+
+
+class StyleFilterTests(TestCase):
+    """The Style menu on All rings, from the Filter by style story."""
+
+    def setUp(self):
+        owner = User.objects.create_user("amy", password="Test-pass-123")
+        make_ring(owner, name="Aurora", style=Ring.Style.HALO)
+        make_ring(owner, name="Borealis", style=Ring.Style.BAND)
+        self.url = reverse("ring_list")
+
+    def names_shown(self, response):
+        return sorted(ring.name for ring in response.context["rings"])
+
+    def test_all_rings_has_a_style_menu(self):
+        response = self.client.get(self.url)
+        self.assertContains(response, '<select class="form-select" id="style"')
+        self.assertContains(response, "All styles")
+        for value in Ring.Style.values:
+            self.assertContains(response, f'<option value="{value}"')
+
+    def test_choosing_a_style_shows_only_that_style(self):
+        response = self.client.get(self.url, {"style": "halo"})
+        self.assertEqual(self.names_shown(response), ["Aurora"])
+        self.assertContains(response, "1 ring in the halo style")
+
+    def test_the_count_shows_every_ring_without_a_style(self):
+        response = self.client.get(self.url)
+        self.assertEqual(self.names_shown(response), ["Aurora", "Borealis"])
+        self.assertContains(response, "2 rings")
+
+    def test_message_and_show_all_rings_when_none_match(self):
+        response = self.client.get(self.url, {"style": "trilogy"})
+        self.assertContains(response, "No trilogy rings yet.")
+        self.assertContains(response, f'href="{self.url}">Show all rings')
+
+    def test_a_style_that_does_not_exist_shows_every_ring(self):
+        response = self.client.get(self.url, {"style": "banana"})
+        self.assertEqual(self.names_shown(response), ["Aurora", "Borealis"])
+
+    def test_page_links_keep_the_style(self):
+        owner = User.objects.get(username="amy")
+        for number in range(1, 11):
+            make_ring(owner, name=f"Halo {number}", style=Ring.Style.HALO)
+        response = self.client.get(self.url, {"style": "halo"})
+        self.assertContains(response, 'href="?style=halo&amp;page=2"')

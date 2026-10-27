@@ -17,12 +17,38 @@ def home(request):
 
 
 class RingList(generic.ListView):
-    """The All rings page: every ring, nine rings a page."""
+    """The All rings page: every ring, nine rings a page.
+
+    ?style=halo shows only halo rings. A style that doesn't exist, such
+    as ?style=banana, is ignored, so every ring shows.
+    """
 
     model = Ring
     template_name = "rings/ring_list.html"
     context_object_name = "rings"
     paginate_by = 9
+
+    def get_style(self):
+        """The style chosen in the Style menu, or "" for every style."""
+        style = self.request.GET.get("style", "")
+        if style in Ring.Style.values:
+            return style
+        return ""
+
+    def get_queryset(self):
+        rings = Ring.objects.all()
+        style = self.get_style()
+        if style:
+            rings = rings.filter(style=style)
+        return rings
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        style = self.get_style()
+        context["style"] = style
+        context["style_name"] = Ring.Style(style).label if style else ""
+        context["styles"] = Ring.Style.choices
+        return context
 
 
 def ring_detail(request, slug):
