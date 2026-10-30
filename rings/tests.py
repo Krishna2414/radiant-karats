@@ -1,6 +1,6 @@
+from datetime import date, timedelta
 from decimal import Decimal
 from unittest import mock
-from datetime import timedelta
 
 import cloudinary.exceptions
 from django.contrib.auth.models import AnonymousUser, User
@@ -56,6 +56,18 @@ class HomePageTests(TestCase):
         ring = make_ring(self.owner, name="Aurora")
         response = self.client.get(reverse("home"))
         self.assertContains(response, f'href="{ring.get_absolute_url()}"')
+
+    @mock.patch("rings.views.timezone.localdate")
+    def test_halloween_effect_appears_during_halloween_season(self, mock_localdate):
+        mock_localdate.return_value = date(2024, 10, 31)
+        response = self.client.get(reverse("home"))
+        self.assertContains(response, '<div class="halloween" aria-hidden="true">')
+
+    @mock.patch("rings.views.timezone.localdate")
+    def test_halloween_effect_is_hidden_outside_halloween_season(self, mock_localdate):
+        mock_localdate.return_value = date(2024, 11, 2)
+        response = self.client.get(reverse("home"))
+        self.assertNotContains(response, '<div class="halloween" aria-hidden="true">')
 
 
 class RingModelTests(TestCase):

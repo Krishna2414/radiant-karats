@@ -54,6 +54,9 @@ main:focus {
     outline: none;
 }
 
+h1.helperbird-editor {
+    text-transform: capitalize;
+}
 /* ---------- Keyboard focus ---------- */
 a:focus-visible,
 button:focus-visible,
@@ -258,7 +261,16 @@ button:focus-visible,
 }
 
 .hero-note {
+    position: absolute;
+    right: clamp(1rem, 3vw, 3rem);
+    bottom: clamp(1rem, 2vw, 2rem);
+    z-index: 0;
     display: none;
+    width: clamp(220px, 28vw, 420px);
+    height: clamp(220px, 28vw, 420px);
+    background: url("../images/hero-ring.svg") center / contain no-repeat;
+    filter: drop-shadow(0 1rem 1.5rem rgba(212, 175, 55, 0.25));
+    pointer-events: none;
 }
 
 .collection-section {
@@ -490,10 +502,256 @@ button:focus-visible,
 
 .ring-info a {
     color: inherit;
-    text-decoration: none;
+    text-decoration: none !important;
+    text-transform: capitalize;
 }
 
 .ring-card:hover .ring-info a,
 .ring-info a:focus-visible {
     text-decoration: underline;
+}
+
+
+@media (min-width: 992px) {
+    .hero-note {
+        display: block;
+    }
+}
+
+@media (min-width: 768px) {
+    .form-card {
+        padding: 2rem;
+    }
+}
+
+/* ---------- Halloween (home page hero) ----------
+   A moon, bats, a spider, a web and two pumpkins behind the hero text.
+   They're shown from 24 October to 1 November by
+   templates/includes/halloween.html. Only CSS moves them. */
+.halloween {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.halloween-shapes {
+    position: absolute;
+}
+
+/* The moon, with a soft orange glow */
+.halloween-moon {
+    position: absolute;
+    top: 50%;
+    right: 9%;
+    width: clamp(160px, 20vw, 260px);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #fff4d6 0%, #f3d27a 45%, #d9a441 75%, #b9822a 100%);
+    box-shadow: 0 0 60px 18px rgba(240, 150, 50, 0.3);
+    transform: translateY(-50%);
+}
+
+.halloween-moon::before,
+.halloween-moon::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(170, 115, 35, 0.25);
+}
+
+.halloween-moon::before {
+    top: 28%;
+    left: 52%;
+    width: 18%;
+    height: 18%;
+}
+
+.halloween-moon::after {
+    top: 58%;
+    left: 30%;
+    width: 12%;
+    height: 12%;
+}
+
+/* Twinkling stars */
+.halloween-star {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #fff4d6;
+    box-shadow: 0 0 6px 2px rgba(255, 244, 214, 0.6);
+    animation: halloween-twinkle 4s ease-in-out infinite;
+}
+
+.star-1 { top: 14%; left: 56%; }
+.star-2 { top: 26%; left: 93%; animation-delay: -1s; }
+.star-3 { top: 74%; left: 60%; animation-delay: -2s; }
+.star-4 { top: 9%; left: 78%; animation-delay: -3s; }
+
+/* Bats fly across the hero, flapping their wings */
+.halloween-bat {
+    position: absolute;
+    width: 48px;
+    height: 24px;
+    fill: #0b0e14;
+    animation: halloween-fly 18s linear infinite;
+}
+
+.halloween-bat svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    transform-origin: 50% 40%;
+    animation: halloween-flap 0.25s ease-in-out infinite alternate;
+}
+
+.bat-1 { top: 22%; left: 66%; }
+.bat-2 { top: 60%; left: 80%; width: 36px; height: 18px; animation-duration: 22s; animation-delay: -8s; }
+.bat-3 { top: 34%; left: 88%; width: 28px; height: 14px; animation-duration: 26s; animation-delay: -15s; }
+.bat-4 { top: 48%; left: 58%; width: 40px; height: 20px; animation-duration: 20s; animation-delay: -4s; }
+.bat-5 { top: 12%; left: 74%; width: 30px; height: 15px; animation-duration: 24s; animation-delay: -19s; }
+
+/* A spider on a thread, bobbing up and down */
+.halloween-spider {
+    position: absolute;
+    top: 0;
+    left: 62%;
+    width: 26px;
+    height: 26px;
+    margin-top: 70px;
+    animation: halloween-bob 5s ease-in-out infinite;
+}
+
+.halloween-spider::before {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    width: 1px;
+    height: 400px;
+    background: rgba(255, 255, 255, 0.35);
+}
+
+.halloween-spider svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    fill: #0b0e14;
+    stroke: #0b0e14;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+}
+
+/* A cobweb in the bottom corner */
+.halloween-web {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: clamp(110px, 14vw, 180px);
+    height: clamp(110px, 14vw, 180px);
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.22);
+    stroke-width: 0.8;
+}
+
+/* Two pumpkins with flickering faces */
+.halloween-pumpkin {
+    position: absolute;
+    bottom: 10px;
+    width: 72px;
+    height: 63px;
+    filter: drop-shadow(0 0 10px rgba(255, 140, 40, 0.45));
+}
+
+.pumpkin-1 { right: 7%; }
+.pumpkin-2 { right: calc(7% + 64px); bottom: 6px; width: 54px; height: 47px; }
+
+.halloween-face {
+    animation: halloween-flicker 3s ease-in-out infinite;
+}
+
+.pumpkin-2 .halloween-face { animation-delay: -1.5s; }
+
+@keyframes halloween-fly {
+    0% { transform: translate(-100vw, 30px); }
+    25% { transform: translate(-60vw, -10px); }
+    50% { transform: translate(-20vw, 20px); }
+    75% { transform: translate(20vw, -15px); }
+    100% { transform: translate(60vw, 10px); }
+}
+
+@keyframes halloween-flap {
+    from { transform: scaleY(1); }
+    to { transform: scaleY(0.35); }
+}
+
+@keyframes halloween-bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(30px); }
+}
+
+@keyframes halloween-twinkle {
+    0%, 100% { opacity: 0.2; }
+    50% { opacity: 1; }
+}
+
+@keyframes halloween-flicker {
+    0%, 100% { opacity: 1; }
+    40% { opacity: 0.7; }
+    60% { opacity: 0.9; }
+}
+
+/* Phones and tablets: a smaller moon in the top corner, and fewer bats */
+@media (max-width: 991.98px) {
+    .halloween-moon {
+        top: 12px;
+        right: 12px;
+        width: 60px;
+        box-shadow: 0 0 30px 8px rgba(240, 150, 50, 0.3);
+        transform: none;
+    }
+
+    .halloween-spider,
+    .bat-4,
+    .bat-5,
+    .star-3 {
+        display: none;
+    }
+
+    .halloween-pumpkin { width: 50px; height: 44px; }
+    .pumpkin-2 { right: calc(7% + 44px); width: 38px; height: 33px; }
+}
+
+/* Keep everything still for people who turn off motion */
+@media (prefers-reduced-motion: reduce) {
+    .halloween *,
+    .halloween *::before {
+        animation: none !important;
+    }
+}
+
+/* ---------- Ring picture (home page hero) ----------
+   A gold ring on the right of the hero text on large screens. It's only
+   decoration, so it's a CSS background: screen readers skip it, and phones,
+   which don't show it, never download it. At Halloween the bats fly
+   behind it. */
+
+/* 62em is 992px at the normal text size. Because it's in em, the ring
+   also hides when someone sets a bigger text size in their browser, so it
+   never sits behind the words. */
+@media (min-width: 62em) {
+    .hero-content::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        right: calc(var(--bs-gutter-x) * 0.5);
+        z-index: -1;
+        width: clamp(300px, 30vw, 440px);
+        height: clamp(300px, 30vw, 440px);
+        background: url("../images/hero-ring.svg") center / contain no-repeat;
+        transform: translateY(-50%);
+        margin-right: 30px;
+    }
 }

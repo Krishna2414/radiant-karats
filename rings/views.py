@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.views import generic
 
 from .forms import RingForm
@@ -23,11 +24,26 @@ SORT_ORDERS = {
 }
 
 
+def show_halloween_effect():
+    """Return True during the Halloween season, inclusive of Oct 24 to Nov 1."""
+    today = timezone.localdate()
+    if today.month == 10 and today.day >= 24:
+        return True
+    if today.month == 11 and today.day <= 1:
+        return True
+    return False
+
+
 def home(request):
     """The home page, with the three newest rings."""
     latest_rings = Ring.objects.all()[:3]
     return render(
-        request, "rings/index.html", {"latest_rings": latest_rings}
+        request,
+        "rings/index.html",
+        {
+            "latest_rings": latest_rings,
+            "show_halloween_effect": show_halloween_effect(),
+        },
     )
 
 

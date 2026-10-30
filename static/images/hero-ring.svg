@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <!-- A gold solitaire ring for the home page hero. Drawn for Radiant Karats. -->
+  <defs>
+    <radialGradient id="glow" cy="54%">
+      <stop offset="0%" stop-color="#faf7f2" stop-opacity=".13"/>
+      <stop offset="100%" stop-color="#faf7f2" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="shine">
+      <stop offset="0%" stop-color="#fff" stop-opacity=".35"/>
+      <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="top" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f8e08e"/>
+      <stop offset="40%" stop-color="#d4af37"/>
+      <stop offset="100%" stop-color="#a8811f"/>
+    </linearGradient>
+    <linearGradient id="side" x2="0" y2="1">
+      <stop offset="0%" stop-color="#b8902a"/>
+      <stop offset="100%" stop-color="#7d5f12"/>
+    </linearGradient>
+    <linearGradient id="inside" x2="0" y2="1">
+      <stop offset="0%" stop-color="#7d5f12"/>
+      <stop offset="100%" stop-color="#c49d2c"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Soft light, two gold circles and the light under the ring -->
+  <circle cx="200" cy="216" r="184" fill="url(#glow)"/>
+  <circle cx="200" cy="216" r="172" fill="none" stroke="#d4af37" stroke-opacity=".5" stroke-width="1.5"/>
+  <circle cx="200" cy="216" r="188" fill="none" stroke="#d4af37" stroke-opacity=".45" stroke-width="2" stroke-linecap="round" stroke-dasharray="0 9"/>
+  <ellipse cx="200" cy="336" rx="118" ry="9" fill="#faf7f2" opacity=".12"/>
+
+  <!-- The band: outside edge, inside of the back, then the top -->
+  <path fill="url(#side)" d="M88 250V266A112 62 0 0 0 312 266V250A112 62 0 0 1 88 250Z"/>
+  <path fill="url(#inside)" d="M108 250A92 46 0 0 1 292 250V266A92 46 0 0 0 108 266Z"/>
+  <path fill="url(#top)" fill-rule="evenodd" d="M88 250A112 62 0 1 1 312 250A112 62 0 1 1 88 250ZM108 250A92 46 0 1 0 292 250A92 46 0 1 0 108 250Z"/>
+  <path fill="none" stroke="#fff3c4" stroke-width="4" stroke-linecap="round" opacity=".9" d="M104 268A102 54 0 0 0 149 297"/>
+  <path fill="none" stroke="#fbe7a6" stroke-width="3" stroke-linecap="round" opacity=".8" d="M251 203A102 54 0 0 1 288 223"/>
+
+  <!-- The diamond, its setting and two claws -->
+  <circle cx="200" cy="140" r="64" fill="url(#shine)"/>
+  <path fill="#b8932a" d="M184 186H216L211 200H189Z"/>
+  <g stroke="#8fa9c0" stroke-width="1.5" stroke-linejoin="round">
+    <path fill="#e8f1f9" d="M148 138L172 110L186 138Z"/>
+    <path fill="#fff" d="M172 110H200L186 138Z"/>
+    <path fill="#f3f8fc" d="M200 110L214 138H186Z"/>
+    <path fill="#fff" d="M200 110H228L214 138Z"/>
+    <path fill="#dce9f4" d="M228 110L252 138H214Z"/>
+    <path fill="#cfe0ee" d="M148 138H186L200 184Z"/>
+    <path fill="#eef5fb" d="M186 138H214L200 184Z"/>
+    <path fill="#b9d0e4" d="M214 138H252L200 184Z"/>
+  </g>
+  <path fill="none" stroke="#c49d2c" stroke-width="5.5" stroke-linecap="round" d="M191 194L152 136M209 194L248 136"/>
+
+  <!-- Sparkles -->
+  <path fill="#fff" d="M178 102 180.5 108.5 187 111 180.5 113.5 178 120 175.5 113.5 169 111 175.5 108.5Z"/>
+  <path fill="#fff" d="M282 86 285.5 95.5 295 99 285.5 102.5 282 112 278.5 102.5 269 99 278.5 95.5Z"/>
+  <path fill="#e0bd4e" d="M116 132 119 140 127 143 119 146 116 154 113 146 105 143 113 140Z"/>
+  <path fill="#fff" d="M320 186 322 191 327 193 322 195 320 200 318 195 313 193 318 191Z"/>
+  <path fill="#e0bd4e" d="M86 330 88 335 93 337 88 339 86 344 84 339 79 337 84 335Z"/>
+</svg>
