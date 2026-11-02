@@ -9,9 +9,9 @@ from django.db import models
 from django.urls import reverse
 from django.utils.text import slugify
 
-# The ring pages will use the addresses /rings/add/ and /rings/mine/,
-# so no ring may use "add" or "mine" as its slug.
-RESERVED_SLUGS = {"add", "mine"}
+# The ring pages use the addresses /rings/add/, /rings/mine/ and
+# /rings/favourites/, so no ring may use those words as its slug.
+RESERVED_SLUGS = {"add", "mine", "favourites"}
 
 
 class Ring(models.Model):
@@ -124,3 +124,26 @@ class Ring(models.Model):
         metal = self.get_metal_display().lower()
         style = self.get_style_display().lower()
         return f"{self.name}, a {metal} {style} ring"
+
+
+class Favourite(models.Model):
+    """A ring that a user has saved, to find again on their Favourites."""
+
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="favourites"
+    )
+    ring = models.ForeignKey(
+        Ring, on_delete=models.CASCADE, related_name="favourites"
+    )
+    created_on = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_on"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "ring"], name="one_favourite_per_user_and_ring"
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.ring} saved by {self.user}"
