@@ -7,7 +7,13 @@ urlpatterns = [
     path("rings/", views.RingList.as_view(), name="ring_list"),
     path("rings/add/", views.ring_create, name="ring_create"),
     path("rings/mine/", views.my_rings, name="my_rings"),
+    path("rings/favourites/", views.favourites, name="favourites"),
     path("rings/<slug:slug>/", views.ring_detail, name="ring_detail"),
     path("rings/<slug:slug>/edit/", views.ring_edit, name="ring_edit"),
     path("rings/<slug:slug>/delete/", views.ring_delete, name="ring_delete"),
+    path(
+        "rings/<slug:slug>/favourite/",
+        views.toggle_favourite,
+        name="toggle_favourite",
+    ),
 ]

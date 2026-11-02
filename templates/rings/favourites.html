@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Favourites{% endblock %}
+
+{% block content %}
+<section class="collection-section">
+    <div class="container">
+        <div class="section-heading">
+            <div>
+                <p class="eyebrow">Your collection</p>
+                <h1>Favourites</h1>
+            </div>
+        </div>
+
+        {% if rings %}
+        <div class="row g-4">
+            {% for ring in rings %}
+            <div class="col-md-6 col-lg-4 d-flex flex-column">
+                {% include "includes/ring_card.html" %}
+                <form class="mt-2" method="post" action="{% url 'toggle_favourite' ring.slug %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.path }}">
+                    <button type="submit" class="btn btn-sm btn-outline-ink">Remove<span class="visually-hidden"> {{ ring.name }}</span> from favourites</button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <p>You haven't saved any rings yet. Open a ring and choose Save to favourites.</p>
+            <a class="btn btn-gold" href="{% url 'ring_list' %}">Browse rings</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

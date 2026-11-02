@@ -3,10 +3,12 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.views import generic
+from django.views.decorators.http import require_POST
 
 from .forms import RingForm
-from .models import Ring
+from .models import Favourite, Ring
 
 # The Sort menu on All rings: the value in the address, then the label.
 SORT_OPTIONS = {
@@ -103,9 +105,14 @@ class RingList(generic.ListView):
 def ring_detail(request, slug):
     """One ring's own page, or the 404 page if no ring has that slug."""
     ring = get_object_or_404(Ring, slug=slug)
+    is_favourite = (
+        request.user.is_authenticated
+        and ring.favourites.filter(user=request.user).exists()
+    )
     context = {
         "ring": ring,
         "can_change": ring.can_be_changed_by(request.user),
+        "is_favourite": is_favourite,
     }
     return render(request, "rings/ring_detail.html", context)
 
@@ -166,3 +173,38 @@ def my_rings(request):
     """The signed-in user's own rings, newest first."""
     rings = request.user.rings.all()
     return render(request, "rings/my_rings.html", {"rings": rings})
+
+
+@login_required
+@require_POST
+def toggle_favourite(request, slug):
+    """Save a ring to Favourites, or remove it if it's already saved."""
+    ring = get_object_or_404(Ring, slug=slug)
+    saved = Favourite.objects.filter(user=request.user, ring=ring)
+    if saved.exists():
+        saved.delete()
+        messages.success(
+            request, f"{ring.name} has been removed from your favourites."
+        )
+    else:
+        Favourite.objects.create(user=request.user, ring=ring)
+        messages.success(
+            request, f"{ring.name} has been saved to your favourites."
+        )
+    # Go back to the page the button was on, but only on this website.
+    next_url = request.POST.get("next", "")
+    if url_has_allowed_host_and_scheme(
+        next_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return redirect(next_url)
+    return redirect(ring)
+
+
+@login_required
+def favourites(request):
+    """The rings the signed-in user has saved, newest saved first."""
+    saved = request.user.favourites.select_related("ring")
+    rings = [favourite.ring for favourite in saved]
+    return render(request, "rings/favourites.html", {"rings": rings})

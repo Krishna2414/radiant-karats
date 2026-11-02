@@ -43,11 +43,24 @@
 
                 <h2 class="h4">About this ring</h2>
                 <p>{{ ring.description|linebreaksbr }}</p>
-                {% if can_change %}
+                {% if user.is_authenticated %}
                     <div class="d-flex flex-wrap gap-2 mt-4">
+                        <form method="post" action="{% url 'toggle_favourite' ring.slug %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ request.path }}">
+                            {% if is_favourite %}
+                            <button type="submit" class="btn btn-outline-ink"><span aria-hidden="true">&#9829;</span> Remove from favourites</button>
+                            {% else %}
+                            <button type="submit" class="btn btn-gold"><span aria-hidden="true">&#9825;</span> Save to favourites</button>
+                            {% endif %}
+                        </form>
+                        {% if can_change %}
                         <a class="btn btn-ink" href="{% url 'ring_edit' ring.slug %}">Edit ring</a>
-                                                <a class="btn btn-outline-danger" href="{% url 'ring_delete' ring.slug %}" data-bs-toggle="modal" data-bs-target="#delete-modal">Delete ring</a>
+                        <a class="btn btn-outline-danger" href="{% url 'ring_delete' ring.slug %}" data-bs-toggle="modal" data-bs-target="#delete-modal">Delete ring</a>
+                        {% endif %}
                     </div>
+                {% else %}
+                    <p class="mt-4"><a href="{% url 'account_login' %}?next={{ request.path|urlencode }}">Log in</a> to save this ring to your favourites.</p>
                 {% endif %}
             </div>
         </div>
