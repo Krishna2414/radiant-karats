@@ -89,7 +89,7 @@ should-have story is built, and so is one could-have: search by name (US17).
 | --- | --- | --- |
 | Must have | Register, log in and log out; see who is logged in; browse every ring; a page for each ring; add, edit and delete my own rings, with a photo; nobody else can change my rings; the site owner can manage every ring; works on any screen | US01 to US11 |
 | Should have | The newest rings on the home page; My rings; filter by style; sort by price; custom 404 and 403 pages | US12 to US16 |
-| Could have | Search by name (built); favourite rings | US17 and US18 |
+| Could have | Search by name (built); favourite rings (built) | US17 and US18 |
 | Won't have this time | Made-to-order rings; buying rings online | US19 and US20 |
 
 **Kept out on purpose.** My facilitator advised me to keep this project
@@ -353,10 +353,10 @@ and My rings with no rings yet.
 
 The navbar is on every page. It shows who is signed in ("Signed in as
 KK1424"), and only the links that person can use: visitors see Log in and
-Register, signed-in users see Add a ring, My rings and Log out, and staff also
-see Admin. The current page is underlined. On phones and tablets the links fold
-into a menu button, shown open in [Tablet and mobile view](#tablet-and-mobile-view).
-*Stories US01 to US03, US10 and US11.*
+Register, signed-in users see Add a ring, My rings, Favourites and Log out,
+and staff also see Admin. The current page is underlined. On phones and
+tablets the links fold into a menu button, shown open in [Tablet and mobile
+view](#tablet-and-mobile-view). *Stories US01 to US03, US10 and US11.*
 
 ![The navbar for a visitor and for the site owner](docs/screenshots/navbar-states.webp)
 
@@ -479,6 +479,17 @@ button appear. *Story US13.*
 | --- | --- |
 | ![My rings](docs/screenshots/my-rings.webp) | ![My rings with no rings](docs/screenshots/my-rings-empty.webp) |
 
+#### Favourites
+
+Signed-in users can save any ring to their Favourites list and return to it
+later. The button changes between Save to favourites and Remove from
+favourites, and the list shows the saved rings most recently added first.
+*Story US18.*
+
+| Save to favourites on the ring page | Favourites page |
+| --- | --- |
+| ![Save to favourites on the ring page](docs/screenshots/favourites-ring.png) | ![Your saved rings on the Favourites page](docs/screenshots/favourites-page.png) |
+
 #### Accounts
 
 Register, log in and log out use django-allauth, styled to match the site.
@@ -574,7 +585,6 @@ full width.
 - **Made-to-order rings** (US19): customers choose the metal, stone and size
   of a ring to be made for them, and the site owner sends a quote.
 - **A shop** (US20): a basket and online payments, for example with Stripe.
-- **Favourites** (US18): save rings to look at again later.
 - **More photos** for each ring, shown as a small gallery.
 - **More filters**, such as metal, gemstone and a price range.
 - **Tidying up Cloudinary**: delete a ring's old photo when it's replaced, or
