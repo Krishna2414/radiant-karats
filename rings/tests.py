@@ -58,6 +58,40 @@ class HomePageTests(TestCase):
         response = self.client.get(reverse("home"))
         self.assertContains(response, f'href="{ring.get_absolute_url()}"')
 
+        def test_hero_counts_the_rings_and_the_people_who_added_them(self):
+        other = User.objects.create_user("ben", password="Test-pass-123")
+        make_ring(self.owner, name="Aurora")
+        make_ring(self.owner, name="Borealis")
+        make_ring(other, name="Corona")
+        response = self.client.get(reverse("home"))
+        self.assertContains(response, "<strong>3</strong> rings")
+        self.assertContains(response, "<strong>5</strong> styles")
+        self.assertContains(response, "<strong>2</strong> collectors")
+
+    def test_each_style_links_to_its_rings_with_a_count(self):
+        make_ring(self.owner, name="Aurora", style=Ring.Style.HALO)
+        response = self.client.get(reverse("home"))
+        counts = {
+            style["value"]: style["count"]
+            for style in response.context["styles"]
+        }
+        self.assertEqual(counts["halo"], 1)
+        self.assertEqual(counts["band"], 0)
+        halo_link = f'href="{reverse("ring_list")}?style=halo"'
+        self.assertContains(response, halo_link)
+
+    def test_hero_button_depends_on_whether_you_are_signed_in(self):
+        button = 'class="btn btn-outline-light hero-button" href="{}"'
+        signup = button.format(reverse("account_signup"))
+        add_ring = button.format(reverse("ring_create"))
+        response = self.client.get(reverse("home"))
+        self.assertContains(response, signup)
+        self.assertNotContains(response, add_ring)
+        self.client.force_login(self.owner)
+        response = self.client.get(reverse("home"))
+        self.assertContains(response, add_ring)
+        self.assertNotContains(response, signup)
+
     @mock.patch("rings.views.timezone.localdate")
     def test_christmas_snow_shows_in_the_season(self, mock_localdate):
         for day in [date(2026, 11, 1), date(2026, 12, 25), date(2027, 1, 6)]:
