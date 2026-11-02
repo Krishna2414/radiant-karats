@@ -71,6 +71,7 @@ button:focus-visible,
 .navbar a:focus-visible,
 .navbar button:focus-visible,
 .hero a:focus-visible,
+.cta-section a:focus-visible,
 .site-footer a:focus-visible {
     outline-color: var(--rk-gold);
 }
@@ -173,7 +174,14 @@ button:focus-visible,
 
 /* ---------- Home page ---------- */
 .hero {
-    background: radial-gradient(circle at 78% 45%, #3a4860 0%, #2e3641 62%);
+    background:
+        radial-gradient(1.5px 1.5px at 8% 18%, rgba(255, 255, 255, 0.8), transparent),
+        radial-gradient(1px 1px at 22% 72%, rgba(212, 175, 55, 0.9), transparent),
+        radial-gradient(1.5px 1.5px at 41% 12%, rgba(212, 175, 55, 0.7), transparent),
+        radial-gradient(1px 1px at 55% 86%, rgba(255, 255, 255, 0.7), transparent),
+        radial-gradient(1.5px 1.5px at 67% 24%, rgba(255, 255, 255, 0.6), transparent),
+        radial-gradient(2px 2px at 93% 64%, rgba(212, 175, 55, 0.8), transparent),
+        radial-gradient(circle at 78% 45%, #3a4860 0%, #2e3641 62%);
     color: #fff;
 }
 
@@ -681,5 +689,187 @@ button:focus-visible,
         background: url("../images/hero-ring.svg") center / contain no-repeat;
         transform: translateY(-50%);
         margin-right: 30px;
+    }
+}
+
+/* ---------- Home page: buttons and numbers in the hero ---------- */
+.hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.hero-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 2.5rem;
+    margin: 2.5rem 0 0;
+    padding: 0;
+    list-style: none;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.hero-stats strong {
+    display: block;
+    color: var(--rk-gold);
+    font-family: var(--rk-serif);
+    font-size: 2.25rem;
+    font-variant-numeric: lining-nums;
+    line-height: 1;
+}
+
+/* ---------- Home page: the four highlights ----------
+   A white panel that sits over the bottom of the hero. */
+.highlights {
+    position: relative;
+    z-index: 2;
+    margin-top: -2.5rem;
+}
+
+.highlight-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: 1.5rem;
+    margin: 0;
+    padding: 1.75rem;
+    border: 1px solid var(--rk-line);
+    border-radius: 1rem;
+    background: #fff;
+    box-shadow: 0 1.25rem 2.5rem rgba(28, 36, 48, 0.12);
+    list-style: none;
+}
+
+.highlight {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.highlight-icon {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    background: var(--rk-champagne);
+    color: var(--rk-gold-text);
+}
+
+.highlight-icon svg {
+    width: 1.5rem;
+    height: 1.5rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.highlight p {
+    margin-bottom: 0;
+    color: var(--rk-muted);
+}
+
+.highlight .highlight-title {
+    margin-bottom: 0.25rem;
+    color: var(--rk-ink);
+    font-weight: 700;
+}
+
+/* ---------- Home page: browse by style ---------- */
+.style-section {
+    padding: 1rem 0 0;
+}
+
+.style-section .eyebrow,
+.how-it-works .eyebrow {
+    color: var(--rk-gold-text);
+}
+
+.style-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr));
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.style-tile {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 1rem 1rem 1.25rem;
+    border: 1px solid var(--rk-line);
+    border-radius: var(--rk-radius);
+    background: var(--rk-champagne);
+    color: var(--rk-ink);
+    text-align: center;
+    text-decoration: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.style-tile:hover {
+    border-color: var(--rk-gold);
+    box-shadow: 0 0.75rem 1.5rem rgba(28, 36, 48, 0.12);
+    color: var(--rk-ink);
+    transform: translateY(-4px);
+}
+
+.style-tile img {
+    width: 100%;
+    height: auto;
+    margin-bottom: 0.5rem;
+}
+
+.style-name {
+    font-family: var(--rk-serif);
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.style-count {
+    color: var(--rk-muted);
+    font-size: 0.95rem;
+}
+
+/* ---------- Home page: the dark box at the bottom ---------- */
+.cta-section {
+    padding: 4rem 0;
+}
+
+.cta-section .custom-ring {
+    margin-top: 0;
+    padding: clamp(2rem, 5vw, 3.5rem);
+    border: 0;
+    background: radial-gradient(circle at 85% 20%, #3a4860 0%, var(--rk-ink) 70%);
+    color: #fff;
+}
+
+.cta-section .custom-ring p {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.cta-section .custom-ring .eyebrow {
+    color: var(--rk-gold);
+}
+
+/* No sliding tiles for people who turn off motion */
+@media (prefers-reduced-motion: reduce) {
+    .style-tile {
+        transition: none;
+    }
+
+    .style-tile:hover {
+        transform: none;
+    }
+}
+
+
+@media (max-width: 767px) {
+    .collection-section {
+        padding: 2rem 0;
     }
 }

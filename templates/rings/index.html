@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Rings, made to mean something{% endblock %}
 
@@ -9,7 +10,64 @@
         <p class="eyebrow">A little brilliance, every day</p>
         <h1>Find the ring<br>that feels like <em>you.</em></h1>
         <p class="hero-copy">Thoughtfully chosen rings for the moments you want to keep close. Discover your next forever favourite.</p>
-        <a class="btn btn-gold hero-button" href="#collection">Explore the collection</a>
+        <div class="hero-actions">
+            <a class="btn btn-gold hero-button" href="#collection">Explore the collection</a>
+            {% if user.is_authenticated %}
+            <a class="btn btn-outline-light hero-button" href="{% url 'ring_create' %}">Add a ring</a>
+            {% else %}
+            <a class="btn btn-outline-light hero-button" href="{% url 'account_signup' %}">Create an account</a>
+            {% endif %}
+        </div>
+        {% if ring_count %}
+        <ul class="hero-stats">
+            <li><strong>{{ ring_count }}</strong> ring{{ ring_count|pluralize }}</li>
+            <li><strong>{{ styles|length }}</strong> styles</li>
+            <li><strong>{{ collector_count }}</strong> collector{{ collector_count|pluralize }}</li>
+        </ul>
+        {% endif %}
+    </div>
+</section>
+
+<section class="highlights" aria-label="Why Radiant Karats">
+    <div class="container">
+        <ul class="highlight-list">
+            <li class="highlight">
+                <span class="highlight-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" focusable="false"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
+                </span>
+                <div>
+                    <p class="highlight-title">Real photos</p>
+                    <p>Every ring shows its photo, or a drawing of its style.</p>
+                </div>
+            </li>
+            <li class="highlight">
+                <span class="highlight-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" focusable="false"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5"/></svg>
+                </span>
+                <div>
+                    <p class="highlight-title">Easy to find</p>
+                    <p>Search by name, filter by style and sort by price.</p>
+                </div>
+            </li>
+            <li class="highlight">
+                <span class="highlight-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" focusable="false"><path d="M6 4h12l3 5-9 11L3 9z"/><path d="M3 9h18M9 4l3 5 3-5M12 9v11"/></svg>
+                </span>
+                <div>
+                    <p class="highlight-title">Your own collection</p>
+                    <p>Add your rings with their metal, gemstone and price.</p>
+                </div>
+            </li>
+            <li class="highlight">
+                <span class="highlight-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" focusable="false"><path d="M12 3 5 6v6c0 4.5 3 7.5 7 9 4-1.5 7-4.5 7-9V6z"/><path d="m9 12 2 2 4-4"/></svg>
+                </span>
+                <div>
+                    <p class="highlight-title">Safe to share</p>
+                    <p>Only you, or the site owner, can change your rings.</p>
+                </div>
+            </li>
+        </ul>
     </div>
 </section>
 
@@ -37,7 +95,34 @@
             <p class="mb-0">No rings yet. Be the first to add one!</p>
         </div>
         {% endif %}
+    </div>
+</section>
 
+<section class="style-section">
+    <div class="container">
+        <div class="section-heading">
+            <div>
+                <p class="eyebrow">Find your style</p>
+                <h2>Browse by style</h2>
+                <p class="section-intro">From a single stone to a full circle of sparkle, start with the shape you love.</p>
+            </div>
+        </div>
+        <ul class="style-grid">
+            {% for style in styles %}
+            <li>
+                <a class="style-tile" href="{% url 'ring_list' %}?style={{ style.value }}">
+                    <img src="{% static style.image %}" alt="" width="400" height="300" loading="lazy">
+                    <span class="style-name">{{ style.label }}</span>
+                    <span class="style-count">{% if style.count %}{{ style.count }} ring{{ style.count|pluralize }}{% else %}None yet{% endif %}</span>
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</section>
+
+<section class="cta-section">
+    <div class="container">
         <div class="custom-ring">
             <div>
                 <p class="eyebrow">Something personal</p>
@@ -45,9 +130,9 @@
                 <p>Have a design in mind? Join us and start building a collection that is uniquely yours.</p>
             </div>
             {% if user.is_authenticated %}
-                <a class="btn btn-outline-gold" href="{% url 'ring_create' %}">Add a ring</a>
+                <a class="btn btn-gold" href="{% url 'ring_create' %}">Add a ring</a>
             {% else %}
-                <a class="btn btn-outline-gold" href="{% url 'account_signup' %}">Create an account</a>
+                <a class="btn btn-gold" href="{% url 'account_signup' %}">Create an account</a>
             {% endif %}
         </div>
     </div>

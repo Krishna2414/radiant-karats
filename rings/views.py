@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
+from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -37,16 +38,26 @@ def show_christmas_effect():
 
 
 def home(request):
-    """The home page, with the three newest rings."""
-    latest_rings = Ring.objects.all()[:3]
-    return render(
-        request,
-        "rings/index.html",
+    """The home page: the newest rings, every style and a few numbers."""
+    rings = Ring.objects.order_by()
+    counts = dict(rings.values_list("style").annotate(total=Count("id")))
+    styles = [
         {
-            "latest_rings": latest_rings,
-            "show_christmas_effect": show_christmas_effect(),
-        },
-    )
+            "value": value,
+            "label": label,
+            "count": counts.get(value, 0),
+            "image": f"images/styles/{value}.svg",
+        }
+        for value, label in Ring.Style.choices
+    ]
+    context = {
+        "latest_rings": Ring.objects.all()[:3],
+        "styles": styles,
+        "ring_count": rings.count(),
+        "collector_count": rings.values("owner").distinct().count(),
+        "show_christmas_effect": show_christmas_effect(),
+    }
+    return render(request, "rings/index.html", context)
 
 
 class RingList(generic.ListView):
