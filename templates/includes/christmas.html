@@ -1,0 +1,48 @@
+{% comment %}
+    Christmas snow for the hero on the home page, with a switch that
+    pauses it. It shows from 1 November to 6 January (show_christmas_effect
+    in rings/views.py). The snow is decoration only, so screen readers
+    skip it.
+{% endcomment %}
+{% if show_christmas_effect %}
+<input class="season-pause-input visually-hidden" type="checkbox" id="season-pause">
+<label class="season-pause" for="season-pause">Pause the snow</label>
+<div class="christmas season-effect" aria-hidden="true">
+    <svg class="christmas-shapes" width="0" height="0">
+        <symbol id="christmas-flake" viewBox="0 0 24 24">
+            <path d="M12 22.5 12 1.5M12 5 9.6 2.8M12 5 14.4 2.8M2.9 17.2 21.1 6.8M18.1 8.5 18.8 5.3M18.1 8.5 21.2 9.5M2.9 6.8 21.1 17.2M18.1 15.5 21.2 14.5M18.1 15.5 18.8 18.7M12 19 14.4 21.2M12 19 9.6 21.2M5.9 15.5 5.2 18.7M5.9 15.5 2.8 14.5M5.9 8.5 2.8 9.5M5.9 8.5 5.2 5.3"/>
+        </symbol>
+    </svg>
+
+    <span class="snowflake" style="--x: 2%; --s: 4px; --d: 9s; --w: -3.6s; --o: 0.75"></span>
+    <span class="snowflake" style="--x: 7%; --s: 3px; --d: 8s; --w: -6.6s; --o: 0.6"></span>
+    <span class="snowflake" style="--x: 11%; --s: 3px; --d: 10s; --w: -5.8s; --o: 0.6"></span>
+    <span class="snowflake" style="--x: 16%; --s: 5px; --d: 9s; --w: -0.3s; --o: 0.85"></span>
+    <span class="snowflake" style="--x: 21%; --s: 4px; --d: 11s; --w: -0.8s; --o: 0.75"></span>
+    <span class="snowflake" style="--x: 26%; --s: 3px; --d: 12s; --w: -5.1s; --o: 0.6"></span>
+    <span class="snowflake" style="--x: 30%; --s: 5px; --d: 8s; --w: -7.6s; --o: 0.85"></span>
+    <span class="snowflake" style="--x: 35%; --s: 6px; --d: 13s; --w: -7.6s; --o: 0.95"></span>
+    <span class="snowflake" style="--x: 40%; --s: 3px; --d: 12s; --w: -7s; --o: 0.6"></span>
+    <span class="snowflake" style="--x: 45%; --s: 3px; --d: 9s; --w: -0.4s; --o: 0.6"></span>
+    <span class="snowflake" style="--x: 50%; --s: 3px; --d: 10s; --w: -4.2s; --o: 0.6"></span>
+    <span class="snowflake" style="--x: 55%; --s: 5px; --d: 8s; --w: -4.6s; --o: 0.85"></span>
+    <span class="snowflake" style="--x: 59%; --s: 5px; --d: 14s; --w: -9.5s; --o: 0.85"></span>
+    <span class="snowflake" style="--x: 64%; --s: 3px; --d: 12s; --w: -6.9s; --o: 0.6"></span>
+    <span class="snowflake" style="--x: 69%; --s: 3px; --d: 10s; --w: -1s; --o: 0.6"></span>
+    <span class="snowflake" style="--x: 73%; --s: 6px; --d: 8s; --w: -4.5s; --o: 0.95"></span>
+    <span class="snowflake" style="--x: 78%; --s: 5px; --d: 9s; --w: -4.5s; --o: 0.85"></span>
+    <span class="snowflake" style="--x: 83%; --s: 5px; --d: 11s; --w: -8.5s; --o: 0.85"></span>
+    <span class="snowflake" style="--x: 88%; --s: 4px; --d: 12s; --w: -11.1s; --o: 0.75"></span>
+    <span class="snowflake" style="--x: 94%; --s: 4px; --d: 10s; --w: -2.5s; --o: 0.75"></span>
+
+    <span class="snowflake crystal" style="--x: 9%; --s: 14px; --d: 16s; --w: -2.9s"><svg><use href="#christmas-flake"/></svg></span>
+    <span class="snowflake crystal" style="--x: 33%; --s: 18px; --d: 18s; --w: -14s"><svg><use href="#christmas-flake"/></svg></span>
+    <span class="snowflake crystal" style="--x: 52%; --s: 12px; --d: 15s; --w: -1.2s"><svg><use href="#christmas-flake"/></svg></span>
+    <span class="snowflake crystal" style="--x: 71%; --s: 16px; --d: 17s; --w: -5.1s"><svg><use href="#christmas-flake"/></svg></span>
+    <span class="snowflake crystal" style="--x: 90%; --s: 14px; --d: 19s; --w: -9.4s"><svg><use href="#christmas-flake"/></svg></span>
+
+    <svg class="christmas-drift" viewBox="0 0 1200 60" preserveAspectRatio="none">
+        <path d="M0 38C120 18 240 50 380 34 520 18 640 46 780 30 920 14 1060 44 1200 26V60H0Z"/>
+    </svg>
+</div>
+{% endif %}

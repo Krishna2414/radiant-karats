@@ -24,12 +24,12 @@ SORT_ORDERS = {
 }
 
 
-def show_halloween_effect():
-    """Return True during the Halloween season, inclusive of Oct 24 to Nov 1."""
+def show_christmas_effect():
+    """Return True in the Christmas season, 1 November to 6 January."""
     today = timezone.localdate()
-    if today.month == 10 and today.day >= 24:
+    if today.month >= 11:
         return True
-    if today.month == 11 and today.day <= 1:
+    if today.month == 1 and today.day <= 6:
         return True
     return False
 
@@ -42,7 +42,7 @@ def home(request):
         "rings/index.html",
         {
             "latest_rings": latest_rings,
-            "show_halloween_effect": show_halloween_effect(),
+            "show_christmas_effect": show_christmas_effect(),
         },
     )
 

@@ -58,16 +58,22 @@ class HomePageTests(TestCase):
         self.assertContains(response, f'href="{ring.get_absolute_url()}"')
 
     @mock.patch("rings.views.timezone.localdate")
-    def test_halloween_effect_appears_during_halloween_season(self, mock_localdate):
-        mock_localdate.return_value = date(2024, 10, 31)
-        response = self.client.get(reverse("home"))
-        self.assertContains(response, '<div class="halloween" aria-hidden="true">')
+    def test_christmas_snow_shows_in_the_season(self, mock_localdate):
+        for day in [date(2026, 11, 1), date(2026, 12, 25), date(2027, 1, 6)]:
+            with self.subTest(day=day):
+                mock_localdate.return_value = day
+                response = self.client.get(reverse("home"))
+                self.assertContains(response, "christmas season-effect")
+                self.assertContains(response, "Pause the snow")
 
     @mock.patch("rings.views.timezone.localdate")
-    def test_halloween_effect_is_hidden_outside_halloween_season(self, mock_localdate):
-        mock_localdate.return_value = date(2024, 11, 2)
-        response = self.client.get(reverse("home"))
-        self.assertNotContains(response, '<div class="halloween" aria-hidden="true">')
+    def test_christmas_snow_is_hidden_outside_the_season(self, mock_localdate):
+        for day in [date(2026, 10, 31), date(2027, 1, 7)]:
+            with self.subTest(day=day):
+                mock_localdate.return_value = day
+                response = self.client.get(reverse("home"))
+                self.assertNotContains(response, "christmas season-effect")
+                self.assertNotContains(response, "Pause the snow")
 
 
 class RingModelTests(TestCase):
