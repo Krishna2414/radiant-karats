@@ -9,7 +9,7 @@
             <div class="col-md-8 col-lg-5">
                 <div class="form-card">
                     <h1 class="h2">Login</h1>
-                    <p>Now here? <a href="{{signup_url}}">Create an account</a> first.</p>
+                    <p>New here? <a href="{{signup_url}}">Create an account</a> first.</p>
                     <form method="post" action="{% url 'account_login' %}">
                         {% csrf_token %}
                         {{ form|crispy }}

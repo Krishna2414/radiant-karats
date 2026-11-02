@@ -604,6 +604,12 @@ button:focus-visible,
     to { transform: rotate(360deg); }
 }
 
+/* Keep a photo's space while it loads (drawings have a width, photos don't). */
+.ring-photo img:not([width]) {
+    aspect-ratio: 1 / 1;
+    object-fit: contain;
+}
+
 /* The Pause the snow switch, in the top corner of the hero */
 .season-pause {
     position: absolute;
