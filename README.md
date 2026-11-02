@@ -164,6 +164,7 @@ flowchart TD
 | Register, Log in | `/accounts/signup/`, `/accounts/login/` | Yes | | |
 | Add a ring | `/rings/add/` | Sent to log in | Yes | Yes |
 | My rings | `/rings/mine/` | Sent to log in | Yes | Yes |
+| Favourites | `/rings/favourites/` | Sent to log in | Yes | Yes |
 | Edit or delete a ring | `/rings/<slug>/edit/`, `/rings/<slug>/delete/` | Sent to log in | Their own rings only | Any ring |
 | Log out | `/accounts/logout/` | | Yes | Yes |
 | Django admin | `/admin/` | | | Yes |
@@ -203,7 +204,7 @@ delete box and the form errors.
 <details open>
 <summary>Home page</summary>
 
-![Home page wireframe](docs/wireframes/home.webp)
+![Home page wireframe](docs/wireframes/home-my-rings-style.svg)
 </details>
 
 <details>
