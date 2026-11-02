@@ -727,6 +727,64 @@ class SortTests(TestCase):
         self.assertEqual(names, ["Halo 1"])
 
 
+class SearchTests(TestCase):
+    """The search box on All rings, from the Search by name story."""
+
+    def setUp(self):
+        owner = User.objects.create_user("amy", password="Test-pass-123")
+        make_ring(owner, name="Aurora", style=Ring.Style.HALO)
+        make_ring(owner, name="Aurora Borealis", style=Ring.Style.BAND)
+        make_ring(owner, name="Evening Star", style=Ring.Style.HALO)
+        self.url = reverse("ring_list")
+
+    def names_shown(self, response):
+        return sorted(ring.name for ring in response.context["rings"])
+
+    def test_all_rings_has_a_search_box(self):
+        response = self.client.get(self.url)
+        self.assertContains(response, 'for="q">Search by name</label>')
+        self.assertContains(response, 'type="search" id="q" name="q"')
+
+    def test_search_finds_part_of_a_name_in_any_case(self):
+        response = self.client.get(self.url, {"q": "AURORA"})
+        self.assertEqual(
+            self.names_shown(response), ["Aurora", "Aurora Borealis"]
+        )
+        self.assertContains(response, '2 rings matching "AURORA"')
+
+    def test_search_and_style_work_together(self):
+        response = self.client.get(self.url, {"q": "aurora", "style": "halo"})
+        self.assertEqual(self.names_shown(response), ["Aurora"])
+        self.assertContains(
+            response, '1 ring in the halo style matching "aurora"'
+        )
+
+    def test_message_and_show_all_rings_when_nothing_matches(self):
+        response = self.client.get(self.url, {"q": "zircon"})
+        self.assertEqual(self.names_shown(response), [])
+        self.assertContains(response, 'No rings match "zircon".')
+        self.assertContains(response, f'href="{self.url}">Show all rings')
+
+    def test_spaces_alone_show_every_ring(self):
+        response = self.client.get(self.url, {"q": "   "})
+        self.assertEqual(len(response.context["rings"]), 3)
+        self.assertNotContains(response, "matching")
+
+    def test_the_search_stays_in_the_box_and_the_page_links(self):
+        owner = User.objects.get(username="amy")
+        for number in range(1, 11):
+            make_ring(owner, name=f"Star {number}")
+        response = self.client.get(self.url, {"q": "star"})
+        self.assertContains(response, 'value="star"')
+        link = 'href="?style=&amp;sort=newest&amp;q=star&amp;page=2"'
+        self.assertContains(response, link)
+
+    def test_a_search_is_shown_as_text_not_run_as_code(self):
+        response = self.client.get(self.url, {"q": "<b>Aurora</b>"})
+        self.assertContains(response, "&lt;b&gt;Aurora&lt;/b&gt;")
+        self.assertNotContains(response, "<b>Aurora</b>")
+
+
 class ErrorPageTests(TestCase):
     """The 404 and 403 pages, from the Helpful error pages story."""
 

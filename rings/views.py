@@ -50,8 +50,9 @@ def home(request):
 class RingList(generic.ListView):
     """The All rings page: every ring, nine rings a page.
 
-    ?style=halo shows only halo rings, and ?sort=price_low sorts them by
-    price. Values that don't exist, such as ?style=banana, are ignored.
+    ?q=aurora shows only rings with "aurora" in their name, ?style=halo
+    shows only halo rings, and ?sort=price_low sorts them by price.
+    Values that don't exist, such as ?style=banana, are ignored.
     """
 
     model = Ring
@@ -66,6 +67,10 @@ class RingList(generic.ListView):
             return style
         return ""
 
+    def get_search(self):
+        """The words typed in the search box, without spaces at the ends."""
+        return self.request.GET.get("q", "").strip()[:100]
+
     def get_sort(self):
         """The order chosen in the Sort menu, or "newest" if none is."""
         sort = self.request.GET.get("sort", "")
@@ -75,6 +80,9 @@ class RingList(generic.ListView):
 
     def get_queryset(self):
         rings = Ring.objects.all()
+        search = self.get_search()
+        if search:
+            rings = rings.filter(name__icontains=search)
         style = self.get_style()
         if style:
             rings = rings.filter(style=style)
@@ -88,6 +96,7 @@ class RingList(generic.ListView):
         context["styles"] = Ring.Style.choices
         context["sort"] = self.get_sort()
         context["sort_options"] = SORT_OPTIONS
+        context["q"] = self.get_search()
         return context
 
 

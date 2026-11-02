@@ -16,6 +16,10 @@
         <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
             <form method="get" class="d-flex flex-wrap align-items-end gap-2">
                 <div>
+                    <label class="form-label" for="q">Search by name</label>
+                    <input class="form-control" type="search" id="q" name="q" value="{{ q }}" maxlength="100">
+                </div>
+                <div>
                     <label class="form-label" for="style">Style</label>
                     <select class="form-select" id="style" name="style">
                         <option value="">All styles</option>
@@ -34,7 +38,7 @@
                 </div>
                 <button type="submit" class="btn btn-ink">Apply</button>
             </form>
-            <p class="mb-0 text-secondary">{{ paginator.count }} ring{{ paginator.count|pluralize }}{% if style %} in the {{ style_name|lower }} style{% endif %}</p>
+            <p class="mb-0 text-secondary">{{ paginator.count }} ring{{ paginator.count|pluralize }}{% if style %} in the {{ style_name|lower }} style{% endif %}{% if q %} matching "{{ q }}"{% endif %}</p>
         </div>
 
         {% if rings %}
@@ -44,6 +48,11 @@
                 {% include "includes/ring_card.html" %}
             </div>
             {% endfor %}
+        </div>
+        {% elif q %}
+        <div class="empty-state">
+            <p>No {% if style %}{{ style_name|lower }} {% endif %}rings match "{{ q }}".</p>
+            <a class="btn btn-ink" href="{% url 'ring_list' %}">Show all rings</a>
         </div>
         {% elif style %}
         <div class="empty-state">
@@ -60,11 +69,11 @@
         <nav class="mt-5" aria-label="Ring pages">
             <ul class="pagination justify-content-center">
                 {% if page_obj.has_previous %}
-                <li class="page-item"><a class="page-link" href="?style={{ style }}&amp;sort={{ sort }}&amp;page={{ page_obj.previous_page_number }}">Previous</a></li>
+                <li class="page-item"><a class="page-link" href="?style={{ style }}&amp;sort={{ sort }}{% if q %}&amp;q={{ q|urlencode }}{% endif %}&amp;page={{ page_obj.previous_page_number }}">Previous</a></li>
                 {% endif %}
                 <li class="page-item active" aria-current="page"><span class="page-link">Page {{ page_obj.number }} of {{ paginator.num_pages }}</span></li>
                 {% if page_obj.has_next %}
-                <li class="page-item"><a class="page-link" href="?style={{ style }}&amp;sort={{ sort }}&amp;page={{ page_obj.next_page_number }}">Next</a></li>
+                <li class="page-item"><a class="page-link" href="?style={{ style }}&amp;sort={{ sort }}{% if q %}&amp;q={{ q|urlencode }}{% endif %}&amp;page={{ page_obj.next_page_number }}">Next</a></li>
                 {% endif %}
             </ul>
         </nav>
