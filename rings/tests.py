@@ -5,12 +5,13 @@ from unittest import mock
 import cloudinary.exceptions
 from django.contrib.auth.models import AnonymousUser, User
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.db import IntegrityError, transaction
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import dateformat, timezone
 
 from .forms import STONE_STYLES, RingForm
-from .models import Ring
+from .models import Favourite, Ring
 
 
 def make_ring(owner, name="Aurora", **details):
@@ -91,6 +92,16 @@ class RingModelTests(TestCase):
         second = make_ring(self.owner, name="Aurora")
         self.assertEqual(first.slug, "aurora")
         self.assertEqual(second.slug, "aurora-2")
+
+    def test_a_ring_called_favourites_gets_its_own_slug(self):
+        ring = make_ring(self.owner, name="Favourites")
+        self.assertEqual(ring.slug, "favourites-ring")
+
+    def test_rings_and_favourites_have_clear_names_in_the_admin(self):
+        ring = make_ring(self.owner, name="Aurora")
+        favourite = Favourite.objects.create(user=self.owner, ring=ring)
+        self.assertEqual(str(ring), "Aurora")
+        self.assertEqual(str(favourite), "Aurora saved by amy")
 
 
 class RingListTests(TestCase):
@@ -364,6 +375,14 @@ class RingEditTests(TestCase):
         response = self.client.get(self.url)
         login_url = reverse("account_login")
         self.assertRedirects(response, f"{login_url}?next={self.url}")
+
+    def test_mistakes_on_the_edit_form_are_explained(self):
+        self.client.force_login(self.owner)
+        response = self.client.post(self.url, form_details(price="0"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Please check the form for errors.")
+        self.ring.refresh_from_db()
+        self.assertEqual(self.ring.price, Decimal("1250.00"))
 
     def test_other_users_cannot_edit(self):
         self.client.force_login(self.other)
@@ -783,6 +802,110 @@ class SearchTests(TestCase):
         response = self.client.get(self.url, {"q": "<b>Aurora</b>"})
         self.assertContains(response, "&lt;b&gt;Aurora&lt;/b&gt;")
         self.assertNotContains(response, "<b>Aurora</b>")
+
+
+class FavouriteTests(TestCase):
+    """Saving rings, from the Save favourite rings story."""
+
+    def setUp(self):
+        self.owner = User.objects.create_user("amy", password="Test-pass-123")
+        self.other = User.objects.create_user("ben", password="Test-pass-123")
+        self.ring = make_ring(self.owner, name="Aurora")
+        self.save_url = reverse("toggle_favourite", args=[self.ring.slug])
+        self.url = reverse("favourites")
+
+    def test_visitors_are_sent_to_log_in(self):
+        login_url = reverse("account_login")
+        response = self.client.get(self.url)
+        self.assertRedirects(response, f"{login_url}?next={self.url}")
+        response = self.client.post(self.save_url)
+        self.assertRedirects(response, f"{login_url}?next={self.save_url}")
+        self.assertFalse(Favourite.objects.exists())
+
+    def test_visitors_see_a_log_in_link_instead_of_the_button(self):
+        response = self.client.get(self.ring.get_absolute_url())
+        self.assertContains(response, "to save this ring to your favourites")
+        self.assertNotContains(response, "Save to favourites")
+
+    def test_only_signed_in_users_see_favourites_in_the_navbar(self):
+        link = f'href="{self.url}"'
+        self.assertNotContains(self.client.get(reverse("home")), link)
+        self.client.force_login(self.other)
+        self.assertContains(self.client.get(reverse("home")), link)
+
+    def test_saving_a_ring_adds_it_with_a_message(self):
+        self.client.force_login(self.other)
+        response = self.client.post(self.save_url, follow=True)
+        self.assertRedirects(response, self.ring.get_absolute_url())
+        self.assertTrue(
+            Favourite.objects.filter(user=self.other, ring=self.ring).exists()
+        )
+        self.assertContains(
+            response, "Aurora has been saved to your favourites."
+        )
+        self.assertContains(response, "Remove from favourites")
+
+    def test_pressing_the_button_again_removes_it(self):
+        Favourite.objects.create(user=self.other, ring=self.ring)
+        self.client.force_login(self.other)
+        response = self.client.post(self.save_url, follow=True)
+        self.assertFalse(Favourite.objects.exists())
+        self.assertContains(
+            response, "Aurora has been removed from your favourites."
+        )
+        self.assertContains(response, "Save to favourites")
+
+    def test_favourites_lists_only_my_saved_rings_newest_first(self):
+        borealis = make_ring(self.owner, name="Borealis")
+        make_ring(self.owner, name="Corona")
+        older = Favourite.objects.create(user=self.other, ring=self.ring)
+        Favourite.objects.filter(pk=older.pk).update(
+            created_on=timezone.now() - timedelta(days=1)
+        )
+        Favourite.objects.create(user=self.other, ring=borealis)
+        Favourite.objects.create(user=self.owner, ring=self.ring)
+        self.client.force_login(self.other)
+        response = self.client.get(self.url)
+        names = [ring.name for ring in response.context["rings"]]
+        self.assertEqual(names, ["Borealis", "Aurora"])
+        self.assertNotContains(response, "Corona")
+
+    def test_message_and_browse_button_show_with_no_favourites(self):
+        self.client.force_login(self.other)
+        response = self.client.get(self.url)
+        self.assertContains(response, "You haven't saved any rings yet.")
+        self.assertContains(response, f'href="{reverse("ring_list")}"')
+
+    def test_removing_on_the_favourites_page_goes_back_there(self):
+        Favourite.objects.create(user=self.other, ring=self.ring)
+        self.client.force_login(self.other)
+        response = self.client.post(self.save_url, {"next": self.url})
+        self.assertRedirects(response, self.url)
+        self.assertFalse(Favourite.objects.exists())
+
+    def test_next_address_on_another_website_is_ignored(self):
+        self.client.force_login(self.other)
+        response = self.client.post(
+            self.save_url, {"next": "https://example.com/"}
+        )
+        self.assertRedirects(response, self.ring.get_absolute_url())
+
+    def test_the_save_address_only_accepts_post(self):
+        self.client.force_login(self.other)
+        response = self.client.get(self.save_url)
+        self.assertEqual(response.status_code, 405)
+        self.assertFalse(Favourite.objects.exists())
+
+    def test_a_ring_can_only_be_saved_once_by_each_user(self):
+        Favourite.objects.create(user=self.other, ring=self.ring)
+        with self.assertRaises(IntegrityError):
+            with transaction.atomic():
+                Favourite.objects.create(user=self.other, ring=self.ring)
+
+    def test_deleting_a_ring_removes_it_from_favourites(self):
+        Favourite.objects.create(user=self.other, ring=self.ring)
+        self.ring.delete()
+        self.assertFalse(Favourite.objects.exists())
 
 
 class ErrorPageTests(TestCase):
